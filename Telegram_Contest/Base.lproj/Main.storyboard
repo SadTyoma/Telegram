@@ -40,12 +40,10 @@
                                         </imageView>
                                     </subviews>
                                     <constraints>
-                                        <constraint firstItem="0VG-gA-X6I" firstAttribute="centerX" secondItem="tth-dm-4IW" secondAttribute="centerX" id="6hD-jp-c2L"/>
-                                        <constraint firstItem="0VG-gA-X6I" firstAttribute="centerY" secondItem="tth-dm-4IW" secondAttribute="centerY" id="FIk-U6-qei"/>
-                                        <constraint firstAttribute="bottom" secondItem="0VG-gA-X6I" secondAttribute="bottom" id="Hqa-rZ-JSa"/>
-                                        <constraint firstItem="0VG-gA-X6I" firstAttribute="top" secondItem="tth-dm-4IW" secondAttribute="top" id="SEy-Nr-eKr"/>
-                                        <constraint firstAttribute="trailing" secondItem="0VG-gA-X6I" secondAttribute="trailing" id="aH6-6K-m7r"/>
-                                        <constraint firstItem="0VG-gA-X6I" firstAttribute="leading" secondItem="tth-dm-4IW" secondAttribute="leading" id="q2Y-1l-qvS"/>
+                                        <constraint firstAttribute="bottom" secondItem="0VG-gA-X6I" secondAttribute="bottom" id="HYc-JU-k4O"/>
+                                        <constraint firstItem="0VG-gA-X6I" firstAttribute="leading" secondItem="tth-dm-4IW" secondAttribute="leading" id="VVa-S5-2ae"/>
+                                        <constraint firstItem="0VG-gA-X6I" firstAttribute="top" secondItem="tth-dm-4IW" secondAttribute="top" id="jrb-OB-VzQ"/>
+                                        <constraint firstAttribute="trailing" secondItem="0VG-gA-X6I" secondAttribute="trailing" id="mMg-sm-043"/>
                                     </constraints>
                                 </collectionViewCellContentView>
                                 <connections>
