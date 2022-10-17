@@ -18,6 +18,18 @@ class PhotoCollectionViewCell: UICollectionViewCell {
 }
 
 extension UIImageView {
+    func setImage(image: UIImage?, targetSize size: CGSize, completionHandler: ((Bool) -> Void)?) {
+        if let img = image{
+            let croppedImage = cropImage(sourceImage: img)
+            let scaledImage = croppedImage.scalePreservingAspectRatio(
+                targetSize: size
+            )
+            
+            self.image = scaledImage
+            completionHandler?(true)
+        }
+    }
+    
     func fetchImageAssetWithCropping(_ asset: PHAsset?, targetSize size: CGSize, contentMode: PHImageContentMode = .aspectFill, options: PHImageRequestOptions? = nil, completionHandler: ((Bool) -> Void)?) {
         
         guard let asset = asset else {
@@ -27,7 +39,7 @@ extension UIImageView {
         
         let resultHandler: (UIImage?, [AnyHashable: Any]?) -> Void = { [self] image, info in
             if let img = image{
-                
+                DataController.addImage(image: img)
                 let croppedImage = cropImage(sourceImage: img)
                 let scaledImage = croppedImage.scalePreservingAspectRatio(
                     targetSize: size
@@ -37,10 +49,11 @@ extension UIImageView {
                 completionHandler?(true)
             }
         }
+        let photoSize = CGSize(width: size.width * 2, height: size.height * 2)
         
         PHImageManager.default().requestImage(
             for: asset,
-            targetSize: PHImageManagerMaximumSize,
+            targetSize: photoSize,
             contentMode: contentMode,
             options: options,
             resultHandler: resultHandler)
