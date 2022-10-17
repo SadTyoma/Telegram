@@ -18,55 +18,80 @@ class PhotoCollectionViewCell: UICollectionViewCell {
 }
 
 extension UIImageView {
-    func fetchImageAsset(_ asset: PHAsset?, targetSize size: CGSize, contentMode: PHImageContentMode = .aspectFill, options: PHImageRequestOptions? = nil, completionHandler: ((Bool) -> Void)?) {
+    func fetchImageAssetWithCropping(_ asset: PHAsset?, targetSize size: CGSize, contentMode: PHImageContentMode = .aspectFill, options: PHImageRequestOptions? = nil, completionHandler: ((Bool) -> Void)?) {
         
         guard let asset = asset else {
             completionHandler?(false)
             return
         }
         
-        let resultHandler: (UIImage?, [AnyHashable: Any]?) -> Void = { image, info in
+        let resultHandler: (UIImage?, [AnyHashable: Any]?) -> Void = { [self] image, info in
             if let img = image{
-                let sideLength = min(
-                    img.size.width,
-                    img.size.height
+                
+                let croppedImage = cropImage(sourceImage: img)
+                let scaledImage = croppedImage.scalePreservingAspectRatio(
+                    targetSize: size
                 )
                 
-                let sourceSize = img.size
-                let xOffset = (sourceSize.width - sideLength) / 2.0
-                let yOffset = (sourceSize.height - sideLength) / 2.0
-                
-                let cropRect = CGRect(
-                    x: xOffset,
-                    y: yOffset,
-                    width: sideLength,
-                    height: sideLength
-                ).integral
-                
-                let sourceCGImage = img.cgImage!
-                let croppedCGImage = sourceCGImage.cropping(
-                    to: cropRect
-                )!
-                
-                // Use the cropped cgImage to initialize a cropped
-                // UIImage with the same image scale and orientation
-                let croppedImage = UIImage(
-                    cgImage: croppedCGImage,
-                    scale: img.imageRendererFormat.scale,
-                    orientation: img.imageOrientation
-                )
-                
-                self.image = croppedImage
+                self.image = scaledImage
                 completionHandler?(true)
             }
         }
         
         PHImageManager.default().requestImage(
             for: asset,
-            targetSize: size,
+            targetSize: PHImageManagerMaximumSize,
             contentMode: contentMode,
             options: options,
             resultHandler: resultHandler)
+    }
+    
+    func fetchImageAsset(_ asset: PHAsset?, targetSize size: CGSize, contentMode: PHImageContentMode = .aspectFill, options: PHImageRequestOptions? = nil, completionHandler: ((Bool) -> Void)?) {
+        guard let asset = asset else {
+            completionHandler?(false)
+            return
+        }
+        let resultHandler: (UIImage?, [AnyHashable: Any]?) -> Void = { image, info in
+            self.image = image
+            completionHandler?(true)
+        }
+        PHImageManager.default().requestImage(
+            for: asset,
+            targetSize: PHImageManagerMaximumSize,
+            contentMode: contentMode,
+            options: options,
+            resultHandler: resultHandler)
+    }
+    
+    func cropImage(sourceImage:UIImage)->UIImage{
+        let sideLength = min(
+            sourceImage.size.width,
+            sourceImage.size.height
+        )
+
+        let sourceSize = sourceImage.size
+        let xOffset = (sourceSize.width - sideLength) / 2.0
+        let yOffset = (sourceSize.height - sideLength) / 2.0
+
+        let cropRect = CGRect(
+            x: xOffset,
+            y: yOffset,
+            width: sideLength,
+            height: sideLength
+        ).integral
+
+        let sourceCGImage = sourceImage.cgImage!
+        let croppedCGImage = sourceCGImage.cropping(
+            to: cropRect
+        )!
+
+        let croppedImage = UIImage(
+            cgImage: croppedCGImage,
+            scale: sourceImage.imageRendererFormat.scale,
+            orientation: sourceImage.imageOrientation
+        )
+        
+        return croppedImage
     }
 }
 

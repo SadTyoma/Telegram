@@ -10,6 +10,7 @@ import Photos
 
 class PhotosCollectionViewController: UICollectionViewController {
     var assets: PHFetchResult<PHAsset>
+    let imagesInRow = 5
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) not implemented.")
@@ -46,16 +47,17 @@ class PhotosCollectionViewController: UICollectionViewController {
             fatalError("Unable to dequeue PhotoCollectionViewCell")
         }
         let asset = assets[indexPath.item]
-        var imageRequestOptions: PHImageRequestOptions {
-            let options = PHImageRequestOptions()
-            options.version = .current
-            options.resizeMode = .exact
-            options.deliveryMode = .highQualityFormat
-            options.isNetworkAccessAllowed = true
-            options.isSynchronous = true
-            return options
-        }
-        cell.imageView.fetchImageAsset(asset, targetSize: cell.imageView.bounds.size, options: imageRequestOptions, completionHandler: nil)
+//        var imageRequestOptions: PHImageRequestOptions {
+//            let options = PHImageRequestOptions()
+//            options.version = .current
+//            options.resizeMode = .exact
+//            options.deliveryMode = .highQualityFormat
+//            options.isNetworkAccessAllowed = true
+//            options.isSynchronous = true
+//            return options
+//        }
+        let cellSize = Double(self.view.frame.size.width) / Double(imagesInRow) - 1;
+        cell.imageView.fetchImageAssetWithCropping(asset, targetSize: CGSize(width: cellSize, height: cellSize), completionHandler: nil)
         return cell
     }
 }
