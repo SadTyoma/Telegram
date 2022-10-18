@@ -17,7 +17,6 @@
 		9AC86B0028F81D5D00353DAD /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9AC86AFE28F81D5D00353DAD /* LaunchScreen.storyboard */; };
 		9AC86B0828F8273400353DAD /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AC86B0728F8273400353DAD /* Image.swift */; };
 		9AC86B0C28F89A1100353DAD /* PhotoCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AC86B0B28F89A1100353DAD /* PhotoCollectionViewCell.swift */; };
-		9AD4A2AE28FDE0F800C2AB63 /* DataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AD4A2AD28FDE0F800C2AB63 /* DataController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,7 +32,6 @@
 		9AC86B0128F81D5D00353DAD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9AC86B0728F8273400353DAD /* Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
 		9AC86B0B28F89A1100353DAD /* PhotoCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCollectionViewCell.swift; sourceTree = "<group>"; };
-		9AD4A2AD28FDE0F800C2AB63 /* DataController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,7 +67,6 @@
 				9AC86AF328F81D5A00353DAD /* AppDelegate.swift */,
 				9AC86AF528F81D5A00353DAD /* SceneDelegate.swift */,
 				9AC86AF728F81D5A00353DAD /* PhotosCollectionViewController.swift */,
-				9AD4A2AD28FDE0F800C2AB63 /* DataController.swift */,
 				9A3AD6A628F9D4F70081D705 /* PhotoViewController.swift */,
 				9AC86B0B28F89A1100353DAD /* PhotoCollectionViewCell.swift */,
 				9AC86B0728F8273400353DAD /* Image.swift */,
@@ -158,7 +155,6 @@
 				9AC86AF428F81D5A00353DAD /* AppDelegate.swift in Sources */,
 				9A3AD6A728F9D4F70081D705 /* PhotoViewController.swift in Sources */,
 				9AC86AF628F81D5A00353DAD /* SceneDelegate.swift in Sources */,
-				9AD4A2AE28FDE0F800C2AB63 /* DataController.swift in Sources */,
 				9AC86B0C28F89A1100353DAD /* PhotoCollectionViewCell.swift in Sources */,
 				9A3AD6AB28F9DD8C0081D705 /* MainViewController.swift in Sources */,
 			);

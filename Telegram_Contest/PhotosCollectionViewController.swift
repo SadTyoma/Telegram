@@ -9,14 +9,12 @@ import UIKit
 import Photos
 
 class PhotosCollectionViewController: UICollectionViewController {
-    var assets: PHFetchResult<PHAsset>
-    let imagesInRow = 5
-    let kScaleBoundLower: CGFloat = 1
-    let kScaleBoundUpper: CGFloat = 4
+    private var assets: PHFetchResult<PHAsset>
+    private var imagesInRow = 3.0
+    private let step = 2.0
+    private let minImagesInRow = 1.0
+    private let maxImagesInRow = 5.0
     private var gesture: UIPinchGestureRecognizer?
-    var scale: CGFloat = 0.0
-    var fitCells = false
-    var animatedZooming = false
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) not implemented.")
@@ -26,6 +24,7 @@ class PhotosCollectionViewController: UICollectionViewController {
         self.assets = assets
         super.init(coder: coder)
         self.title = title
+        self.navigationItem.setHidesBackButton(true, animated: true)
     }
     
     override func viewDidLoad() {
@@ -33,17 +32,8 @@ class PhotosCollectionViewController: UICollectionViewController {
         
         PHPhotoLibrary.shared().register(self)
         
-        fitCells = true
-        
-        animatedZooming = true
-        
-        // Default scale is the average between the lower and upper bound
-        scale = (kScaleBoundUpper + kScaleBoundLower) / 2.0
-        
-        // Register a random cell
         collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: "cell")
         
-        // Add the pinch to zoom gesture
         gesture = UIPinchGestureRecognizer(target: self, action: #selector(didReceivePinchGesture(_:)))
         if let gesture = self.gesture {
             collectionView.addGestureRecognizer(gesture)
@@ -76,73 +66,36 @@ class PhotosCollectionViewController: UICollectionViewController {
         return cell
     }
     
-    // MARK: - Accessors
-    
-    func setScale(_ scale: CGFloat) {
-        // Make sure it doesn't go out of bounds
-        if scale < kScaleBoundLower {
-            self.scale = kScaleBoundLower
-        } else if scale > kScaleBoundUpper {
-            self.scale = kScaleBoundUpper
-        } else {
-            self.scale = floor(scale)
-        }
-    }
-    
-    func getCountOfItems()->Double{
-        if self.scale >= 1 && self.scale < 2{
-            return 1.0
-        }
-        else if self.scale >= 2 && self.scale < 3{
-            return 3.0
-        }
-        else{
-            return 5.0
-        }
-    }
-    
     private func cellSizeCalculation()->CGSize{
         let viewSize = self.collectionView.frame.size.width
-        let scaledWidth = Double(viewSize) / getCountOfItems() - 2;
+        let totalSpacingSize = 2 * (imagesInRow - 1)
+        let fittedWidth = (viewSize - totalSpacingSize) / imagesInRow
         
-        if (self.fitCells) {
-            let cols = floor(viewSize / scaledWidth);
-            let totalSpacingSize = 2 * (cols - 1); // 10 is defined in the xib
-            let fittedWidth = (viewSize - totalSpacingSize) / cols;
-            return CGSize(width: fittedWidth, height: fittedWidth)
-        } else {
-            return CGSize(width: scaledWidth, height: scaledWidth);
-        }
+        return CGSize(width: fittedWidth, height: fittedWidth)
     }
-    
-    private var scaleStart: CGFloat = 0.0;
 
     @objc func didReceivePinchGesture(_ gesture: UIPinchGestureRecognizer){
-        if (gesture.state == .began)
-        {
-            scaleStart = self.scale;
-            return;
-        }
         if (gesture.state == .changed)
         {
-            // Apply the scale of the gesture to get the new scale
-            setScale(scaleStart * gesture.scale)
-            
-            if (self.animatedZooming && self.gesture != nil)
-            {
-                // Animated zooming (remove and re-add the gesture recognizer to prevent updates during the animation)
-                self.collectionView.removeGestureRecognizer(self.gesture!)
-                let newLayout = UICollectionViewFlowLayout()
-                self.collectionView.setCollectionViewLayout(newLayout, animated: true) { finished in
-                    self.collectionView.addGestureRecognizer(self.gesture!)
-                }
+            if gesture.scale < 1{
+                imagesInRow += step
+            }else{
+                imagesInRow -= step
             }
-            else
-            {
-                // Invalidate layout
-                if(floor(self.scale) != floor(scaleStart)){
-                    self.collectionView.collectionViewLayout.invalidateLayout()
-                }
+            
+            if imagesInRow < minImagesInRow{
+                imagesInRow = minImagesInRow
+            }else if imagesInRow > maxImagesInRow{
+                imagesInRow = maxImagesInRow
+            }
+            
+            self.collectionView.removeGestureRecognizer(self.gesture!)
+            let newLayout = UICollectionViewFlowLayout()
+            self.collectionView.setCollectionViewLayout(newLayout, animated: true) { finished in
+                self.collectionView.addGestureRecognizer(self.gesture!)
+            }
+            if let indexPaths = collectionView?.indexPathsForVisibleItems {
+                collectionView?.reconfigureItems(at: indexPaths)
             }
         }
     }
@@ -150,12 +103,10 @@ class PhotosCollectionViewController: UICollectionViewController {
 
 extension PhotosCollectionViewController: PHPhotoLibraryChangeObserver {
     func photoLibraryDidChange(_ changeInstance: PHChange) {
-        // 1
         guard let change = changeInstance.changeDetails(for: assets) else {
             return
         }
         DispatchQueue.main.sync {
-            // 2
             assets = change.fetchResultAfterChanges
             collectionView.reloadData()
         }

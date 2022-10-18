@@ -10,7 +10,6 @@ import Photos
 
 class MainViewController: UIViewController {
     var allPhotos = PHFetchResult<PHAsset>()
-    //let dataController = DataController.getInstance()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -20,7 +19,6 @@ class MainViewController: UIViewController {
             self.fetchAssets()
         }
         PHPhotoLibrary.shared().register(self)
-        //dataController.startLoadData(assets: allPhotos)
     }
     
     func getPermissionIfNecessary(completionHandler: @escaping (Bool) -> Void) {
