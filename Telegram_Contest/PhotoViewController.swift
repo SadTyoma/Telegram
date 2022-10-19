@@ -8,6 +8,11 @@
 import UIKit
 import Photos
 
+let CAPACITY = 100
+let FF = 0.2
+let LOWER = 0.01
+let UPPER = 1.0
+
 class PhotoViewController: UIViewController {
     
     @IBOutlet weak var saveButton: UIButton!
@@ -31,7 +36,15 @@ class PhotoViewController: UIViewController {
     @IBAction func undoClicked(_ sender: Any) { undo()}
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         getPhoto()
+        self.photoView.isMultipleTouchEnabled = false
+        tap = UITapGestureRecognizer(target: self, action: #selector(eraseDrawing(_:)))
+        tap?.numberOfTapsRequired = 2
+        if let tap = tap{
+            self.photoView.addGestureRecognizer(tap)
+        }
+        
         updateUndoButton()
         PHPhotoLibrary.shared().register(self)
     }
@@ -135,6 +148,163 @@ class PhotoViewController: UIViewController {
         photoView.fetchImageAsset(asset, targetSize: view.bounds.size, completionHandler: nil)
     }
     
+    struct LineSegment{
+        var firstPoint: CGPoint
+        var secondPoint: CGPoint
+    }
+    
+    private var incrementalImage: UIImage?
+    private var pts = [CGPoint](repeating: CGPoint.zero, count: 5)
+    private var ctr = 0
+    private var pointsBuffer = [CGPoint](repeating: CGPoint.zero, count: CAPACITY)
+    private var bufIdx = 0
+    private var drawingQueue = DispatchQueue(label: "com.artyomshuneyko.drawing")
+    private var isFirstTouchPoint = false
+    private var lastSegmentOfPrev: LineSegment?
+    private var tap: UITapGestureRecognizer?
+    
+    @objc func eraseDrawing(_ sender: UITapGestureRecognizer? = nil){
+        incrementalImage = nil
+        self.photoView.setNeedsDisplay()
+    }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        ctr = 0
+        bufIdx = 0
+        let touch = touches.first
+        pts[0] = (touch?.location(in: self.photoView))!
+        isFirstTouchPoint = true
+    }
+    
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        let touch = touches.first
+        let p = touch?.location(in: self.photoView)
+        ctr += 1
+        pts[ctr] = p!
+        if ctr == 4 {
+            pts[3] = CGPoint(x: (pts[2].x + pts[4].x) / 2.0, y: (pts[2].y + pts[4].y) / 2.0)
+
+            for i in 0..<4 {
+                pointsBuffer[bufIdx + i] = pts[i]
+            }
+
+            bufIdx += 4
+
+            let bounds = self.photoView.bounds
+
+            drawingQueue.async(execute: { [self] in
+                let offsetPath = UIBezierPath() // ................. (2)
+                if bufIdx == 0 {
+                    return
+                }
+
+                var ls = [LineSegment](repeating: LineSegment(firstPoint: CGPoint.zero, secondPoint: CGPoint.zero), count: 4)
+                let i = 0
+                while i < bufIdx {
+                    if isFirstTouchPoint {
+                        ls[0] = LineSegment(firstPoint: pointsBuffer[0], secondPoint: pointsBuffer[0])
+                        offsetPath.move(to: ls[0].firstPoint)
+                        isFirstTouchPoint = false
+                    } else {
+                        if let lastSegmentOfPrev = lastSegmentOfPrev {
+                            ls[0] = lastSegmentOfPrev
+                        }
+                    }
+
+                    let frac1: Double = FF / clamp(len_sq(pointsBuffer[i], pointsBuffer[i + 1]), LOWER, UPPER) // ................. (4)
+                    let frac2: Double = FF / clamp(len_sq(pointsBuffer[i + 1], pointsBuffer[i + 2]), LOWER, UPPER)
+                    let frac3: Double = FF / clamp(len_sq(pointsBuffer[i + 2], pointsBuffer[i + 3]), LOWER, UPPER)
+                    ls[1] = lineSegmentPerpendicular(to: LineSegment(firstPoint: pointsBuffer[i], secondPoint: pointsBuffer[i + 1]), ofRelativeLength: frac1) // ................. (5)
+                    ls[2] = lineSegmentPerpendicular(to: LineSegment(firstPoint: pointsBuffer[i + 1], secondPoint: pointsBuffer[i + 2]), ofRelativeLength: frac2)
+                    ls[3] = lineSegmentPerpendicular(to: LineSegment(firstPoint: pointsBuffer[i + 2], secondPoint: pointsBuffer[i + 3]), ofRelativeLength: frac3)
+
+                    offsetPath.move(to: ls[0].firstPoint)
+                    offsetPath.addCurve(to: ls[3].firstPoint, controlPoint1: ls[1].firstPoint, controlPoint2: ls[2].firstPoint)
+                    offsetPath.addLine(to: ls[3].secondPoint)
+                    offsetPath.addCurve(to: ls[0].secondPoint, controlPoint1: ls[2].secondPoint, controlPoint2: ls[1].secondPoint)
+                    offsetPath.close()
+                    
+                    lastSegmentOfPrev = ls[3]
+                }
+                UIGraphicsBeginImageContextWithOptions(bounds.size, true, 0.0)
+                guard let incrementalImage = incrementalImage else {
+                    let rectpath = UIBezierPath(rect: bounds)
+                    UIColor.white.setFill()
+                    rectpath.fill()
+                    return
+                }
+
+                incrementalImage.draw(at: .zero)
+                UIColor.black.setStroke()
+                UIColor.black.setFill()
+                offsetPath.stroke() // ................. (8)
+                offsetPath.fill()
+                self.incrementalImage = UIGraphicsGetImageFromCurrentImageContext()
+                UIGraphicsEndImageContext()
+                offsetPath.removeAllPoints()
+                DispatchQueue.main.async(execute: { [self] in
+                    bufIdx = 0
+                    self.photoView.setNeedsDisplay()
+                })
+            })
+            pts[0] = pts[3]
+            pts[1] = pts[4]
+            ctr = 1
+        }
+    }
+    
+    func drawRect(rect: CGRect){
+        incrementalImage?.draw(in: rect)
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.photoView.setNeedsDisplay()
+    }
+    
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.touchesEnded(touches, with: event)
+    }
+    
+    private func lineSegmentPerpendicular(to pp: LineSegment, ofRelativeLength fraction: Double) -> LineSegment {
+        let x0 = pp.firstPoint.x
+        let y0 = pp.firstPoint.y
+        let x1 = pp.secondPoint.x
+        let y1 = pp.secondPoint.y
+
+        var dx: CGFloat
+        var dy: CGFloat
+        dx = x1 - x0
+        dy = y1 - y0
+
+        var xa: CGFloat
+        var ya: CGFloat
+        var xb: CGFloat
+        var yb: CGFloat
+        xa = x1 + CGFloat(fraction / 2) * dy
+        ya = y1 - CGFloat(fraction / 2) * dx
+        xb = x1 - CGFloat(fraction / 2) * dy
+        yb = y1 + CGFloat(fraction / 2) * dx
+
+        return LineSegment(firstPoint: CGPoint(x: xa, y: ya), secondPoint: CGPoint(x: xb, y: yb))
+
+    }
+    
+    private func len_sq(_ p1: CGPoint,_ p2: CGPoint)->Double{
+        let dx = p2.x - p1.x
+        let dy = p2.y - p1.y
+        
+        return dx * dx + dy * dy
+    }
+    
+    private func clamp(_ value: Double,_ lower: Double,_ higher: Double)->Double{
+        if value < lower{
+            return lower
+        }
+        if value > higher{
+            return higher
+        }
+        return value
+    }
 }
 
 extension PhotoViewController: PHPhotoLibraryChangeObserver {
