@@ -145,7 +145,7 @@ class PhotoViewController: UIViewController {
     }
     
     func getPhoto() {
-        photoView.fetchImageAsset(asset, targetSize: view.bounds.size, completionHandler: nil)
+        photoView.fetchImageAsset(asset, targetSize: photoView.bounds.size, completionHandler: nil)
     }
     
     struct LineSegment{
@@ -163,7 +163,8 @@ class PhotoViewController: UIViewController {
     private var isFirstTouchPoint = false
     private var lastSegmentOfPrev: LineSegment?
     private var tap: UITapGestureRecognizer?
-    private var fullPath = UIBezierPath()
+    private var fullPath = UIBezierPath() //TODO remove
+    private var points = [CGPoint]()
     
     @objc func eraseDrawing(_ sender: UITapGestureRecognizer? = nil){
         incrementalImage = nil
@@ -176,12 +177,14 @@ class PhotoViewController: UIViewController {
         let touch = touches.first
         pts[0] = (touch?.location(in: self.photoView))!
         isFirstTouchPoint = true
-        lastImage=photoView.image
+        lastImage = photoView.image
+        fullPath = UIBezierPath()
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch = touches.first
         let p = touch?.location(in: self.photoView)
+        points.append(p!)
         ctr += 1
         pts[ctr] = p!
         if ctr == 4 {
@@ -271,6 +274,7 @@ class PhotoViewController: UIViewController {
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        fullPath.close()
         if let incrementalImage = incrementalImage, let image = lastImage {
             let size = self.photoView.bounds.size
             UIGraphicsBeginImageContextWithOptions(size, true, 0.0)
@@ -285,7 +289,8 @@ class PhotoViewController: UIViewController {
             UIGraphicsEndImageContext()
             self.photoView.image = newImage
         }
-        
+        let t = classify()
+        points = [CGPoint]()
         self.photoView.setNeedsDisplay()
     }
     
@@ -303,6 +308,102 @@ class PhotoViewController: UIViewController {
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         self.touchesEnded(touches, with: event)
+    }
+    
+    private func classify()->ShapeType{
+        var left = self.photoView.bounds.width
+        var top = self.photoView.bounds.height
+        var right = 0.0
+        var bottom = 0.0
+
+        for point in points {
+            if left > point.x{
+                left = point.x
+            }
+            if right < point.x{
+                right = point.x
+            }
+            if top > point.y{
+                top = point.y
+            }
+            if bottom < point.y{
+                bottom = point.y
+            }
+        }
+        
+        let center = CGPoint(x: (left+right)/2, y: (top+bottom)/2)
+        var sects = [Sector](repeating: Sector(x: 0, y: 0, c: 0), count: 9)
+        let x3 = (right + (1/(right-left)) - left) / 3
+        let y3 = (bottom + (1/(bottom-top)) - top) / 3
+        for point in points {
+            let sx = floor((point.x - left)/x3)
+            let sy = floor((point.y - top)/y3)
+            let idx = Int(sy * 3 + sx)
+            sects[idx].x += point.x
+            sects[idx].y += point.y
+            sects[idx].c += 1
+            if sx == 1 && sy == 1 {
+                return .unknown
+            }
+        }
+        var sigPts = [Sector]()
+        let clk = [0, 1, 2, 5, 8, 7, 6, 3]
+        for cl in clk{
+            let pt = sects[cl];
+            if(pt.c > 0) {
+                sigPts.append(Sector(x: pt.x / CGFloat(pt.c), y: pt.y / CGFloat(pt.c), c: 0))
+            } else {
+                return .unknown
+            }
+        }
+        var angles = [Double]()
+        var i = 0
+        while i < sigPts.count{
+            let a = sigPts[i]
+            let b = sigPts[(i + 1) % sigPts.count]
+            let c = sigPts[(i + 2) % sigPts.count]
+            let ab = sqrt(pow(b.x-a.x, 2)+pow(b.y-a.y, 2))
+            let bc = sqrt(pow(b.x-c.x, 2)+pow(b.y-c.y, 2))
+            let ac = sqrt(pow(c.x-a.x, 2)+pow(c.y-a.y, 2))
+            let deg = floor(acos((pow(bc, 2) + pow(ab, 2) - pow(ac, 2))/(2*bc*ab)) * 180 / Double.pi)
+            
+            angles.append(deg)
+            i += 1
+        }
+        
+        var corners = getCorners(angles: angles, pts: sigPts)
+        if corners.count <= 1 {
+            return .circle
+        }else if corners.count == 3{
+            return .triangle
+        }else if corners.count == 4 {
+            return .rectangle;
+        } else {
+            return .unknown;
+        }
+        
+        return .unknown
+    }
+    
+    private func getCorners(angles: [Double], pts: [Sector])->[Sector]{
+        var list = [Sector]()
+        if pts.isEmpty{
+            list = points.map { p in
+                Sector(point: p, c: 0)
+            }
+        }else{
+            list = pts
+        }
+        
+        var corners = [Sector]()
+        var i = 0
+        while i < angles.count{
+            if angles[i] < 125{
+                corners.append(list[(i + 1) % list.count])
+            }
+            i += 1
+        }
+        return corners
     }
     
     private func lineSegmentPerpendicular(to pp: LineSegment, ofRelativeLength fraction: Double) -> LineSegment {
@@ -368,4 +469,29 @@ extension PhotoViewController: PHPhotoLibraryChangeObserver {
             }
         }
     }
+}
+
+struct Sector{
+    var x:CGFloat
+    var y:CGFloat
+    var c:Int
+    
+    public init(point: CGPoint, c: Int){
+        x = point.x
+        y = point.y
+        self.c = c
+    }
+    
+    public init(x:CGFloat,y:CGFloat,c:Int){
+        self.x = x
+        self.y = y
+        self.c = c
+    }
+}
+
+enum ShapeType{
+    case rectangle
+    case circle
+    case triangle
+    case unknown
 }
