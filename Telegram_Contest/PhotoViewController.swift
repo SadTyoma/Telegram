@@ -154,6 +154,7 @@ class PhotoViewController: UIViewController {
     }
     
     private var incrementalImage: UIImage?
+    private var lastImage: UIImage?
     private var pts = [CGPoint](repeating: CGPoint.zero, count: 5)
     private var ctr = 0
     private var pointsBuffer = [CGPoint](repeating: CGPoint.zero, count: CAPACITY)
@@ -162,6 +163,7 @@ class PhotoViewController: UIViewController {
     private var isFirstTouchPoint = false
     private var lastSegmentOfPrev: LineSegment?
     private var tap: UITapGestureRecognizer?
+    private var fullPath = UIBezierPath()
     
     @objc func eraseDrawing(_ sender: UITapGestureRecognizer? = nil){
         incrementalImage = nil
@@ -174,6 +176,7 @@ class PhotoViewController: UIViewController {
         let touch = touches.first
         pts[0] = (touch?.location(in: self.photoView))!
         isFirstTouchPoint = true
+        lastImage=photoView.image
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -199,11 +202,12 @@ class PhotoViewController: UIViewController {
                 }
 
                 var ls = [LineSegment](repeating: LineSegment(firstPoint: CGPoint.zero, secondPoint: CGPoint.zero), count: 4)
-                let i = 0
+                var i = 0
                 while i < bufIdx {
                     if isFirstTouchPoint {
                         ls[0] = LineSegment(firstPoint: pointsBuffer[0], secondPoint: pointsBuffer[0])
                         offsetPath.move(to: ls[0].firstPoint)
+                        fullPath.move(to: ls[0].firstPoint)
                         isFirstTouchPoint = false
                     } else {
                         if let lastSegmentOfPrev = lastSegmentOfPrev {
@@ -219,30 +223,39 @@ class PhotoViewController: UIViewController {
                     ls[3] = lineSegmentPerpendicular(to: LineSegment(firstPoint: pointsBuffer[i + 2], secondPoint: pointsBuffer[i + 3]), ofRelativeLength: frac3)
 
                     offsetPath.move(to: ls[0].firstPoint)
+                    fullPath.move(to: ls[0].firstPoint)
+                    
                     offsetPath.addCurve(to: ls[3].firstPoint, controlPoint1: ls[1].firstPoint, controlPoint2: ls[2].firstPoint)
+                    fullPath.addCurve(to: ls[3].firstPoint, controlPoint1: ls[1].firstPoint, controlPoint2: ls[2].firstPoint)
+                    
                     offsetPath.addLine(to: ls[3].secondPoint)
+                    fullPath.addLine(to: ls[3].secondPoint)
+                    
                     offsetPath.addCurve(to: ls[0].secondPoint, controlPoint1: ls[2].secondPoint, controlPoint2: ls[1].secondPoint)
+                    fullPath.addCurve(to: ls[0].secondPoint, controlPoint1: ls[2].secondPoint, controlPoint2: ls[1].secondPoint)
+                    
                     offsetPath.close()
                     
                     lastSegmentOfPrev = ls[3]
+                    i += 4
                 }
                 UIGraphicsBeginImageContextWithOptions(bounds.size, true, 0.0)
-                guard let incrementalImage = incrementalImage else {
-                    let rectpath = UIBezierPath(rect: bounds)
-                    UIColor.white.setFill()
-                    rectpath.fill()
-                    return
+                if incrementalImage == nil{
+                    lastImage!.draw(in: CGRect(origin: .zero, size: bounds.size))
                 }
-
-                incrementalImage.draw(at: .zero)
-                UIColor.black.setStroke()
-                UIColor.black.setFill()
-                offsetPath.stroke() // ................. (8)
-                offsetPath.fill()
+                if let incrementalImage = incrementalImage {
+                    incrementalImage.draw(at: .zero)
+                    UIColor.black.setStroke()
+                    UIColor.black.setFill()
+                    offsetPath.stroke() // ................. (8)
+                    offsetPath.fill()
+                }
+                
                 self.incrementalImage = UIGraphicsGetImageFromCurrentImageContext()
                 UIGraphicsEndImageContext()
                 offsetPath.removeAllPoints()
                 DispatchQueue.main.async(execute: { [self] in
+                    drawImage()
                     bufIdx = 0
                     self.photoView.setNeedsDisplay()
                 })
@@ -258,7 +271,34 @@ class PhotoViewController: UIViewController {
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let incrementalImage = incrementalImage, let image = lastImage {
+            let size = self.photoView.bounds.size
+            UIGraphicsBeginImageContextWithOptions(size, true, 0.0)
+            incrementalImage.draw(at: .zero)
+            UIColor.black.setStroke()
+            UIColor.black.setFill()
+            fullPath.stroke()
+            fullPath.fill()
+            image.draw(in: CGRect(origin: .zero, size: size))
+            incrementalImage.draw(in: CGRect(origin: .zero, size: size))
+            let newImage = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            self.photoView.image = newImage
+        }
+        
         self.photoView.setNeedsDisplay()
+    }
+    
+    private func drawImage(){
+        if let incrementalImage = incrementalImage, let image = self.photoView.image{
+            let size = self.photoView.bounds.size
+            UIGraphicsBeginImageContextWithOptions(size, true, 0.0)
+            image.draw(in: CGRect(origin: .zero, size: size))
+            incrementalImage.draw(in: CGRect(origin: .zero, size: size))
+            let newImage = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            self.photoView.image = newImage
+        }
     }
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
