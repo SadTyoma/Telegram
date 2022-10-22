@@ -275,23 +275,89 @@ class PhotoViewController: UIViewController {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         fullPath.close()
-        if let incrementalImage = incrementalImage, let image = lastImage {
-            let size = self.photoView.bounds.size
-            UIGraphicsBeginImageContextWithOptions(size, true, 0.0)
-            incrementalImage.draw(at: .zero)
-            UIColor.black.setStroke()
-            UIColor.black.setFill()
-            fullPath.stroke()
-            fullPath.fill()
-            image.draw(in: CGRect(origin: .zero, size: size))
-            incrementalImage.draw(in: CGRect(origin: .zero, size: size))
-            let newImage = UIGraphicsGetImageFromCurrentImageContext()
-            UIGraphicsEndImageContext()
-            self.photoView.image = newImage
+        let bounds = self.photoView.bounds
+        
+        var newImage: UIImage?
+        let classificationResult = classify()
+        switch classificationResult.type{
+        case .rectangle:
+            newImage = drawRectangle(classificationResult)
+        case .circle:
+            newImage = drawCircle(classificationResult)
+        default:
+            if let image = lastImage{
+                UIGraphicsBeginImageContextWithOptions(bounds.size, true, 0.0)
+                image.draw(in: CGRect(origin: .zero, size: bounds.size))
+                var incImage = UIGraphicsGetImageFromCurrentImageContext()
+
+                incImage!.draw(at: .zero)
+                UIColor.black.setStroke()
+                UIColor.black.setFill()
+                fullPath.stroke()
+                fullPath.fill()
+                incImage = UIGraphicsGetImageFromCurrentImageContext()
+
+                image.draw(in: CGRect(origin: .zero, size: bounds.size))
+                incImage!.draw(in: CGRect(origin: .zero, size: bounds.size))
+                newImage = UIGraphicsGetImageFromCurrentImageContext()
+                UIGraphicsEndImageContext()
+            }
         }
-        let t = classify()
+        
+        self.photoView.image = newImage
+        incrementalImage = newImage
         points = [CGPoint]()
+        fullPath.removeAllPoints()
         self.photoView.setNeedsDisplay()
+    }
+    
+    func drawRectangle(_ clResult: ClassificationResult) -> UIImage? {
+        guard let image = lastImage else {return nil}
+        let bounds = self.photoView.bounds
+
+        UIGraphicsBeginImageContextWithOptions(bounds.size, true, 0.0)
+        image.draw(in: CGRect(origin: .zero, size: bounds.size))
+        var incImage = UIGraphicsGetImageFromCurrentImageContext()
+        incImage!.draw(at: .zero)
+
+        let rectangle = CGRect(x: clResult.x, y: clResult.y, width: clResult.width, height: clResult.height)
+
+        UIColor.black.setFill()
+        UIRectFrame(rectangle)
+
+        incImage = UIGraphicsGetImageFromCurrentImageContext()
+
+        image.draw(in: CGRect(origin: .zero, size: bounds.size))
+        incImage!.draw(in: CGRect(origin: .zero, size: bounds.size))
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return newImage
+    }
+    
+    func drawCircle(_ clResult: ClassificationResult) -> UIImage? {
+        let center = CGPoint(x: clResult.x + clResult.width / 2, y: clResult.y + clResult.height / 2)
+        let path = UIBezierPath()
+        path.addArc(withCenter: center, radius: clResult.height / 2, startAngle: 0.0, endAngle: Double.pi * 2.0, clockwise: true)
+        
+        let bounds = self.photoView.bounds
+        guard let image = lastImage else {return nil}
+        UIGraphicsBeginImageContextWithOptions(bounds.size, true, 0.0)
+        image.draw(in: CGRect(origin: .zero, size: bounds.size))
+        var incImage = UIGraphicsGetImageFromCurrentImageContext()
+
+        incImage!.draw(at: .zero)
+        UIColor.black.setStroke()
+        UIColor.clear.setFill()
+        path.stroke()
+        path.fill()
+        incImage = UIGraphicsGetImageFromCurrentImageContext()
+
+        image.draw(in: CGRect(origin: .zero, size: bounds.size))
+        incImage!.draw(in: CGRect(origin: .zero, size: bounds.size))
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return newImage
     }
     
     private func drawImage(){
@@ -310,7 +376,7 @@ class PhotoViewController: UIViewController {
         self.touchesEnded(touches, with: event)
     }
     
-    private func classify()->ShapeType{
+    private func classify()->ClassificationResult{
         var left = self.photoView.bounds.width
         var top = self.photoView.bounds.height
         var right = 0.0
@@ -343,7 +409,7 @@ class PhotoViewController: UIViewController {
             sects[idx].y += point.y
             sects[idx].c += 1
             if sx == 1 && sy == 1 {
-                return .unknown
+                return ClassificationResult(type: .unknown, x: 0, y: 0, height: 0, width: 0)
             }
         }
         var sigPts = [Sector]()
@@ -353,7 +419,7 @@ class PhotoViewController: UIViewController {
             if(pt.c > 0) {
                 sigPts.append(Sector(x: pt.x / CGFloat(pt.c), y: pt.y / CGFloat(pt.c), c: 0))
             } else {
-                return .unknown
+                return ClassificationResult(type: .unknown, x: 0, y: 0, height: 0, width: 0)
             }
         }
         var angles = [Double]()
@@ -371,18 +437,16 @@ class PhotoViewController: UIViewController {
             i += 1
         }
         
-        var corners = getCorners(angles: angles, pts: sigPts)
+        let corners = getCorners(angles: angles, pts: sigPts)
         if corners.count <= 1 {
-            return .circle
+            return ClassificationResult(type: .circle, x: left, y: top, height: bottom - top, width: right - left)
         }else if corners.count == 3{
-            return .triangle
+            return ClassificationResult(type: .triangle, x: left, y: top, height: bottom - top, width: right - left)
         }else if corners.count == 4 {
-            return .rectangle;
+            return ClassificationResult(type: .rectangle, x: left, y: top, height: bottom - top, width: right - left)
         } else {
-            return .unknown;
+            return ClassificationResult(type: .unknown, x: 0, y: 0, height: 0, width: 0)
         }
-        
-        return .unknown
     }
     
     private func getCorners(angles: [Double], pts: [Sector])->[Sector]{
@@ -487,6 +551,14 @@ struct Sector{
         self.y = y
         self.c = c
     }
+}
+
+struct ClassificationResult{
+    var type: ShapeType
+    var x: CGFloat
+    var y: CGFloat
+    var height: CGFloat
+    var width: CGFloat
 }
 
 enum ShapeType{
