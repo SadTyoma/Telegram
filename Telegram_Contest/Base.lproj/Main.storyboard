@@ -69,54 +69,60 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ekh-LJ-dff">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Ekh-LJ-dff">
                                 <rect key="frame" x="0.0" y="88" width="414" height="684"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="Ekh-LJ-dff" secondAttribute="height" multiplier="23:38" id="UlR-zS-4dS"/>
+                                </constraints>
                             </imageView>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RVu-u2-Eh3">
-                                <rect key="frame" x="340" y="831" width="43" height="31"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" image="arrow.down" catalog="system"/>
+                            <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="DMv-4v-TmM">
+                                <rect key="frame" x="174" y="831" width="220" height="32"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="DMv-4v-TmM" secondAttribute="height" multiplier="131:31" constant="89" id="y6G-nO-O0X"/>
+                                </constraints>
+                                <segments>
+                                    <segment title="Drawing"/>
+                                    <segment title="Text"/>
+                                </segments>
                                 <connections>
-                                    <action selector="SaveClicked:" destination="13D-0h-Evb" eventType="touchUpInside" id="UYB-hs-v0J"/>
+                                    <action selector="segmentedItemChanged:" destination="13D-0h-Evb" eventType="valueChanged" id="6cG-fc-EXD"/>
                                 </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ql9-U4-HOP">
-                                <rect key="frame" x="11" y="832" width="46" height="31"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" image="arrow.uturn.backward" catalog="system"/>
-                                <connections>
-                                    <action selector="undoClicked:" destination="13D-0h-Evb" eventType="touchUpInside" id="89d-sF-DtR"/>
-                                </connections>
-                            </button>
+                            </segmentedControl>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="q1Q-lw-tvs"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="DMv-4v-TmM" firstAttribute="trailing" secondItem="TrS-h3-lLX" secondAttribute="trailingMargin" id="C6u-fU-g4v"/>
+                            <constraint firstItem="Ekh-LJ-dff" firstAttribute="top" secondItem="q1Q-lw-tvs" secondAttribute="top" id="DT0-DG-pIW"/>
+                            <constraint firstItem="DMv-4v-TmM" firstAttribute="bottom" secondItem="q1Q-lw-tvs" secondAttribute="bottom" id="QGp-Ye-nRg"/>
+                            <constraint firstItem="Ekh-LJ-dff" firstAttribute="centerX" secondItem="TrS-h3-lLX" secondAttribute="centerX" id="Tr4-9b-AHm"/>
+                            <constraint firstItem="DMv-4v-TmM" firstAttribute="top" secondItem="Ekh-LJ-dff" secondAttribute="bottom" constant="59" id="UGE-Ee-5G1"/>
+                            <constraint firstItem="Ekh-LJ-dff" firstAttribute="leading" secondItem="q1Q-lw-tvs" secondAttribute="leading" id="W17-O1-ZyA"/>
+                            <constraint firstItem="Ekh-LJ-dff" firstAttribute="trailing" secondItem="q1Q-lw-tvs" secondAttribute="trailing" id="jsU-hT-BBj"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="aJb-yM-b3S">
                         <barButtonItem key="rightBarButtonItem" title="Clear All" style="plain" id="Xev-1U-qyT">
                             <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" id="YHc-CN-g7I">
-                                <rect key="frame" x="302" y="5" width="92" height="34.5"/>
+                                <rect key="frame" x="302" y="4.5" width="92" height="35"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" image="square.and.arrow.down" catalog="system"/>
                             </button>
                             <connections>
-                                <action selector="ClearAllClicked:" destination="13D-0h-Evb" id="aLT-2i-4eU"/>
+                                <action selector="saveClicked:" destination="13D-0h-Evb" id="O8I-yr-Gku"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
                         <outlet property="photoView" destination="Ekh-LJ-dff" id="ym6-cb-qZf"/>
-                        <outlet property="saveButton" destination="RVu-u2-Eh3" id="UGl-IR-cUu"/>
-                        <outlet property="undoButton" destination="Ql9-U4-HOP" id="QQX-Pf-fo2"/>
+                        <outlet property="saveButton" destination="Xev-1U-qyT" id="CiB-J6-qni"/>
+                        <outlet property="segmentedControl" destination="DMv-4v-TmM" id="bMo-3f-ATj"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="3zK-Eh-68H" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2812" y="153"/>
+            <point key="canvasLocation" x="2811.594202898551" y="152.67857142857142"/>
         </scene>
         <!--Main View Controller-->
         <scene sceneID="Ayr-Gk-x2e">
@@ -126,9 +132,11 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YHt-u1-fzV">
-                                <rect key="frame" x="115" y="433" width="184" height="31"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YHt-u1-fzV">
+                                <rect key="frame" x="107" y="423" width="200" height="50"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="YHt-u1-fzV" secondAttribute="height" multiplier="4:1" id="nhZ-Db-2L8"/>
+                                </constraints>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Start"/>
                                 <connections>
@@ -138,6 +146,14 @@
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="yn8-tY-4up"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="YHt-u1-fzV" firstAttribute="leading" secondItem="yn8-tY-4up" secondAttribute="leading" constant="107" id="3N6-Cf-Z8j"/>
+                            <constraint firstItem="YHt-u1-fzV" firstAttribute="centerY" secondItem="nwM-hL-IDf" secondAttribute="centerY" id="EFI-ZK-9y9"/>
+                            <constraint firstItem="YHt-u1-fzV" firstAttribute="top" secondItem="yn8-tY-4up" secondAttribute="top" constant="335" id="hCb-RZ-JF4"/>
+                            <constraint firstItem="yn8-tY-4up" firstAttribute="trailing" secondItem="YHt-u1-fzV" secondAttribute="trailing" constant="107" id="hjc-vh-KzO"/>
+                            <constraint firstItem="YHt-u1-fzV" firstAttribute="centerX" secondItem="nwM-hL-IDf" secondAttribute="centerX" id="lMU-AM-ot4"/>
+                            <constraint firstItem="yn8-tY-4up" firstAttribute="bottom" secondItem="YHt-u1-fzV" secondAttribute="bottom" constant="389" id="mlW-wG-PjV"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="s8o-KY-Ong"/>
                 </viewController>
@@ -165,8 +181,7 @@
         </scene>
     </scenes>
     <resources>
-        <image name="arrow.down" catalog="system" width="120" height="128"/>
-        <image name="arrow.uturn.backward" catalog="system" width="128" height="112"/>
+        <image name="square.and.arrow.down" catalog="system" width="121" height="128"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

@@ -15,9 +15,9 @@ let UPPER = 1.0
 
 class PhotoViewController: UIViewController {
     
-    @IBOutlet weak var saveButton: UIButton!
-    @IBOutlet weak var undoButton: UIButton!
+    @IBOutlet weak var saveButton: UIBarButtonItem!
     @IBOutlet weak var photoView: UIImageView!
+    @IBOutlet weak var segmentedControl: UISegmentedControl!
     
     var asset: PHAsset
     var editingOutput: PHContentEditingOutput?
@@ -31,9 +31,19 @@ class PhotoViewController: UIViewController {
         super.init(coder: coder)
     }
     
-    @IBAction func ClearAllClicked(_ sender: Any) { getPhoto()}
-    @IBAction func SaveClicked(_ sender: Any) { saveImage()}
-    @IBAction func undoClicked(_ sender: Any) { undo()}
+    @IBAction func saveClicked(_ sender: Any) {saveImage()}
+    @IBAction func segmentedItemChanged(_ sender: Any) {
+        switch segmentedControl.selectedSegmentIndex
+            {
+            case 0:
+                drawingEnabled = true
+            case 1:
+                drawingEnabled = false
+            default:
+                break
+            }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -45,7 +55,23 @@ class PhotoViewController: UIViewController {
             self.photoView.addGestureRecognizer(tap)
         }
         
-        updateUndoButton()
+        textField =  UITextField()
+        let midX = view.bounds.midX
+        let midY = view.bounds.midY
+        let size = CGSize(width: view.bounds.size.width / 2, height: view.bounds.height / 20)
+        textField!.frame = CGRect(x: midX - size.width / 2, y: midY - size.height / 2, width: size.width, height: size.height)
+        textField!.placeholder = "Enter text"
+        textField!.borderStyle = UITextField.BorderStyle.roundedRect
+        textField!.autocorrectionType = UITextAutocorrectionType.no
+        textField!.keyboardType = UIKeyboardType.default
+        textField!.returnKeyType = UIReturnKeyType.done
+        textField!.clearButtonMode = UITextField.ViewMode.whileEditing
+        textField!.contentVerticalAlignment = UIControl.ContentVerticalAlignment.center
+        textField!.delegate = self
+            self.view.addSubview(textField!)
+        textField!.isHidden = true
+        
+        //updateUndoButton() //TODO: uncomment
         PHPhotoLibrary.shared().register(self)
     }
     
@@ -92,11 +118,11 @@ class PhotoViewController: UIViewController {
     //      }
     //    }
     
-    func updateUndoButton() {
-        let adjustmentResources = PHAssetResource.assetResources(for: asset)
-            .filter { $0.type == .adjustmentData }
-        undoButton.isEnabled = !adjustmentResources.isEmpty
-    }
+//    func updateUndoButton() {
+//        let adjustmentResources = PHAssetResource.assetResources(for: asset)
+//            .filter { $0.type == .adjustmentData }
+//        undoButton.isEnabled = !adjustmentResources.isEmpty
+//    }
     
     func saveImage() {
         // 1
@@ -122,30 +148,46 @@ class PhotoViewController: UIViewController {
             completionHandler: completionHandler)
     }
     
-    func undo() {
-        // 1
-        let changeRequest: () -> Void = {
-            let request = PHAssetChangeRequest(for: self.asset)
-            request.revertAssetContentToOriginal()
-        }
-        // 2
-        let completionHandler: (Bool, Error?) -> Void = { success, error in
-            guard success else {
-                print("Error: can't revert the asset: \(String(describing: error))")
-                return
-            }
-            DispatchQueue.main.async {
-                self.undoButton.isEnabled = false
-            }
-        }
-        // 3
-        PHPhotoLibrary.shared().performChanges(
-            changeRequest,
-            completionHandler: completionHandler)
-    }
+//    func undo() {
+//        // 1
+//        let changeRequest: () -> Void = {
+//            let request = PHAssetChangeRequest(for: self.asset)
+//            request.revertAssetContentToOriginal()
+//        }
+//        // 2
+//        let completionHandler: (Bool, Error?) -> Void = { success, error in
+//            guard success else {
+//                print("Error: can't revert the asset: \(String(describing: error))")
+//                return
+//            }
+//            DispatchQueue.main.async {
+//                self.undoButton.isEnabled = false
+//            }
+//        }
+//        // 3
+//        PHPhotoLibrary.shared().performChanges(
+//            changeRequest,
+//            completionHandler: completionHandler)
+//    }
     
     func getPhoto() {
         photoView.fetchImageAsset(asset, targetSize: photoView.bounds.size, completionHandler: nil)
+    }
+    
+    func createTextImage(text: String)->UIImage?{
+        let attributes = [
+          NSAttributedString.Key.foregroundColor : UIColor.black,
+          NSAttributedString.Key.font : UIFont(name: "Marker Felt", size: 36.0)!,
+        ]
+        //Create an Attributed String
+        let waterfallText = NSAttributedString(string: text, attributes: attributes)
+        //Convert attributed string to a CIImage
+        let textGenerationFilter = CIFilter(name: "CIAttributedTextImageGenerator")!
+        textGenerationFilter.setValue(waterfallText, forKey: "inputText")
+        textGenerationFilter.setValue(NSNumber(value: Double(1)), forKey: "inputScaleFactor")
+        guard  let outputImage = textGenerationFilter.outputImage else { return nil }
+
+        return UIImage(ciImage: outputImage)
     }
     
     struct LineSegment{
@@ -163,8 +205,14 @@ class PhotoViewController: UIViewController {
     private var isFirstTouchPoint = false
     private var lastSegmentOfPrev: LineSegment?
     private var tap: UITapGestureRecognizer?
-    private var fullPath = UIBezierPath() //TODO remove
+    private var fullPath = UIBezierPath() //TODO: remove
     private var points = [CGPoint]()
+    
+    private var drawingEnabled = true
+    private var textTouchLocation: CGPoint?
+    private var textView: UIImageView?
+    private var textField : UITextField?
+    private var textFromTextField = ""
     
     @objc func eraseDrawing(_ sender: UITapGestureRecognizer? = nil){
         incrementalImage = nil
@@ -172,6 +220,14 @@ class PhotoViewController: UIViewController {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard drawingEnabled else {
+            let touch = touches.first
+            textTouchLocation = touch?.location(in: self.photoView)
+            textField!.isHidden = false
+            
+            return
+        }
+        
         ctr = 0
         bufIdx = 0
         let touch = touches.first
@@ -182,6 +238,16 @@ class PhotoViewController: UIViewController {
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard drawingEnabled else {
+            textField!.isHidden = true
+            let touch = touches.first
+            textTouchLocation = touch?.location(in: self.photoView)
+            if let textView = textView, let textTouchLocation = textTouchLocation {
+                textView.center = textTouchLocation
+            }
+            return
+        }
+        
         let touch = touches.first
         let p = touch?.location(in: self.photoView)
         points.append(p!)
@@ -274,6 +340,7 @@ class PhotoViewController: UIViewController {
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard drawingEnabled else {return}
         fullPath.close()
         
         var newImage: UIImage?
@@ -546,9 +613,30 @@ extension PhotoViewController: PHPhotoLibraryChangeObserver {
             ) { [weak self] _ in
                 guard let self = self else { return }
                 // 5
-                self.updateUndoButton()
+                //self.updateUndoButton() //TODO: uncomment
             }
         }
+    }
+}
+
+extension PhotoViewController: UITextFieldDelegate{
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        textFromTextField = ""
+        textField.text = textFromTextField
+    }
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textFromTextField = textField.text!
+        textField.isHidden = true
+        self.view.endEditing(true)
+        
+        let textImage = createTextImage(text: textFromTextField)
+        textView = UIImageView(image: textImage)
+        if let textView = textView, let textTouchLocation = textTouchLocation {
+            textView.center = textTouchLocation
+            photoView.addSubview(textView)
+        }
+        
+        return true
     }
 }
 
