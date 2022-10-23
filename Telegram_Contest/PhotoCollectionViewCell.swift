@@ -53,6 +53,7 @@ extension UIImageView {
             return
         }
         let resultHandler: (UIImage?, [AnyHashable: Any]?) -> Void = { image, info in
+            self.contentMode = .scaleAspectFill
             self.image = image
             completionHandler?(true)
         }
