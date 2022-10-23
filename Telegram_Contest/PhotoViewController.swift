@@ -275,7 +275,6 @@ class PhotoViewController: UIViewController {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         fullPath.close()
-        let bounds = self.photoView.bounds
         
         var newImage: UIImage?
         let classificationResult = classify()
@@ -285,30 +284,48 @@ class PhotoViewController: UIViewController {
         case .circle:
             newImage = drawCircle(classificationResult)
         default:
-            if let image = lastImage{
-                UIGraphicsBeginImageContextWithOptions(bounds.size, true, 0.0)
-                image.draw(in: CGRect(origin: .zero, size: bounds.size))
-                var incImage = UIGraphicsGetImageFromCurrentImageContext()
-
-                incImage!.draw(at: .zero)
-                UIColor.black.setStroke()
-                UIColor.black.setFill()
-                fullPath.stroke()
-                fullPath.fill()
-                incImage = UIGraphicsGetImageFromCurrentImageContext()
-
-                image.draw(in: CGRect(origin: .zero, size: bounds.size))
-                incImage!.draw(in: CGRect(origin: .zero, size: bounds.size))
-                newImage = UIGraphicsGetImageFromCurrentImageContext()
-                UIGraphicsEndImageContext()
-            }
+            newImage = drawUnknown()
+            self.photoView.image = newImage
+            incrementalImage = newImage
+            points = [CGPoint]()
+            fullPath.removeAllPoints()
+            self.photoView.setNeedsDisplay()
+            
+            return
         }
         
-        self.photoView.image = newImage
+        UIView.transition(with: photoView,
+                          duration: 0.5,
+                          options: .transitionCrossDissolve,
+                          animations: { self.photoView.image = newImage },
+                          completion: nil)
+        
         incrementalImage = newImage
         points = [CGPoint]()
         fullPath.removeAllPoints()
         self.photoView.setNeedsDisplay()
+    }
+    
+    private func drawUnknown()->UIImage?{
+        let bounds = self.photoView.bounds
+        guard let image = lastImage else {return nil}
+        UIGraphicsBeginImageContextWithOptions(bounds.size, true, 0.0)
+        image.draw(in: CGRect(origin: .zero, size: bounds.size))
+        var incImage = UIGraphicsGetImageFromCurrentImageContext()
+        
+        incImage!.draw(at: .zero)
+        UIColor.black.setStroke()
+        UIColor.black.setFill()
+        fullPath.stroke()
+        fullPath.fill()
+        incImage = UIGraphicsGetImageFromCurrentImageContext()
+        
+        image.draw(in: CGRect(origin: .zero, size: bounds.size))
+        incImage!.draw(in: CGRect(origin: .zero, size: bounds.size))
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return newImage
     }
     
     func drawRectangle(_ clResult: ClassificationResult) -> UIImage? {
