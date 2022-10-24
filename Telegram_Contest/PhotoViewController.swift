@@ -222,6 +222,7 @@ class PhotoViewController: UIViewController {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard drawingEnabled else {
             let touch = touches.first
+            guard touch?.view != textView else{ return }
             textTouchLocation = touch?.location(in: self.photoView)
             textField!.isHidden = false
             
