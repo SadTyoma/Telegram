@@ -13,7 +13,6 @@ class DrawAndTextView: UIView {
     @IBOutlet weak var acceptButton: UIButton!
     @IBOutlet weak var brushButton: UIButton!
     @IBOutlet weak var DrawOrText: UISegmentedControl!
-    @IBOutlet weak var sizeField: UITextField!
     @IBOutlet weak var fontType: UISegmentedControl!
     @IBOutlet weak var textView: UIView!
     @IBOutlet weak var sizeView: UIView!
@@ -41,12 +40,7 @@ class DrawAndTextView: UIView {
             textView.isHidden = true
         }
     }
-    @IBAction func sizeChanged(_ sender: Any){}
     @IBAction func fontTypeChanged(_ sender: Any){}
-    
-    var color: UIColor?
-    var font: String?
-    var fontSize: String?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -63,17 +57,54 @@ class DrawAndTextView: UIView {
         view.frame = self.bounds
         addSubview(view)
         
-        let segmentedControl = UISegmentedControl(items: ["Arial-BoldMT", "Futura-Medium ", "Marker Felt"])
-        //sizeField.text = "36"
-        DrawOrText = segmentedControl
         sizeView.isHidden = true
         
-        //let image = UIImage(named: "brush.png")
-        //brushButton.setImage(image, for: .normal)
+        let image = UIImage(named: "brush.png")
+        let newimage = resizeImage(image: image!, targetSize: brushButton.frame.size)
+        brushButton.setImage(newimage, for: .normal)
         
-        colorButton.backgroundColor = .white
-        
+        colorButton.backgroundColor = .black
+        sizeButton.backgroundColor = .black
+                
         acceptButton.isEnabled = false
         textView.isHidden = true
+        
+        colorButton.layer.cornerRadius = 5
+        colorButton.layer.borderWidth = 2
+        colorButton.layer.borderColor = UIColor.white.cgColor
+        
+        sizeButton.layer.cornerRadius = 5
+        sizeButton.layer.borderWidth = 2
+        sizeButton.layer.borderColor = UIColor.white.cgColor
+        
+        sizeBar.maximumValue = 40
+        sizeBar.minimumValue = 10
+        sizeBar.value = 36
+    }
+    
+    private func resizeImage(image: UIImage, targetSize: CGSize) -> UIImage? {
+        let size = image.size
+        
+        let widthRatio  = targetSize.width  / size.width
+        let heightRatio = targetSize.height / size.height
+        
+        // Figure out what our orientation is, and use that to form the rectangle
+        var newSize: CGSize
+        if(widthRatio > heightRatio) {
+            newSize = CGSize(width: size.width * heightRatio, height: size.height * heightRatio)
+        } else {
+            newSize = CGSize(width: size.width * widthRatio, height: size.height * widthRatio)
+        }
+        
+        // This is the rect that we've calculated out and this is what is actually used below
+        let rect = CGRect(origin: .zero, size: newSize)
+        
+        // Actually do the resizing to the rect using the ImageContext stuff
+        UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
+        image.draw(in: rect)
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return newImage
     }
 }

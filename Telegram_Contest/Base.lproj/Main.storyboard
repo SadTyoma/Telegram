@@ -84,9 +84,6 @@
                                     <segment title="Drawing"/>
                                     <segment title="Text"/>
                                 </segments>
-                                <connections>
-                                    <action selector="segmentedItemChanged:" destination="13D-0h-Evb" eventType="valueChanged" id="6cG-fc-EXD"/>
-                                </connections>
                             </segmentedControl>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3dn-B5-Qqk" customClass="DrawAndTextView" customModule="Telegram_Contest" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="725" width="414" height="129"/>
@@ -126,9 +123,9 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="drawingTool" destination="3dn-B5-Qqk" id="WOs-h5-mMC"/>
                         <outlet property="photoView" destination="Ekh-LJ-dff" id="ym6-cb-qZf"/>
                         <outlet property="saveButton" destination="Xev-1U-qyT" id="CiB-J6-qni"/>
-                        <outlet property="segmentedControl" destination="DMv-4v-TmM" id="bMo-3f-ATj"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="3zK-Eh-68H" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

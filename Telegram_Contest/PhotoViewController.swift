@@ -17,7 +17,7 @@ class PhotoViewController: UIViewController {
     
     @IBOutlet weak var saveButton: UIBarButtonItem!
     @IBOutlet weak var photoView: UIImageView!
-    @IBOutlet weak var segmentedControl: UISegmentedControl!
+    @IBOutlet weak var drawingTool: DrawAndTextView!
     
     var asset: PHAsset
     var editingOutput: PHContentEditingOutput?
@@ -29,19 +29,6 @@ class PhotoViewController: UIViewController {
     init?(asset: PHAsset, coder: NSCoder) {
         self.asset = asset
         super.init(coder: coder)
-    }
-    
-    @IBAction func saveClicked(_ sender: Any) {saveImage()}
-    @IBAction func segmentedItemChanged(_ sender: Any) {
-        switch segmentedControl.selectedSegmentIndex
-            {
-            case 0:
-                drawingEnabled = true
-            case 1:
-                drawingEnabled = false
-            default:
-                break
-            }
     }
     
     override func viewDidLoad() {
@@ -71,6 +58,16 @@ class PhotoViewController: UIViewController {
             self.view.addSubview(textField!)
         textField!.isHidden = true
         
+        
+        //DrawingTool
+        drawingTool.undoButton.addTarget(self, action: #selector(self.undo), for: .touchUpInside)
+        drawingTool.colorButton.addTarget(self, action: #selector(self.colorButtonClicked), for: .touchUpInside)
+        drawingTool.sizeBar.addTarget(self, action: #selector(self.sizeChanged), for: .valueChanged)
+        drawingTool.fontType.addTarget(self, action: #selector(self.fontTypeChanged), for: .valueChanged)
+        drawingTool.brushButton.addTarget(self, action: #selector(self.brushButtonClicked), for: .touchUpInside)
+        drawingTool.DrawOrText.addTarget(self, action: #selector(self.drawOrTextChanged), for: .valueChanged)
+        drawingTool.acceptButton.addTarget(self, action: #selector(self.acceptButtonClicked), for: .touchUpInside)
+        
         //updateUndoButton() //TODO: uncomment
         PHPhotoLibrary.shared().register(self)
     }
@@ -78,45 +75,6 @@ class PhotoViewController: UIViewController {
     deinit {
         PHPhotoLibrary.shared().unregisterChangeObserver(self)
     }
-    
-    //    func applyFilter() {
-    //      // 1
-    //      asset.requestContentEditingInput(with: nil) { input, _ in
-    //        // 2
-    //        guard let bundleID = Bundle.main.bundleIdentifier else {
-    //          fatalError("Error: unable to get bundle identifier")
-    //        }
-    //        guard let input = input else {
-    //          fatalError("Error: cannot get editing input")
-    //        }
-    //        guard let filterData = Filter.noir.data else {
-    //          fatalError("Error: cannot get filter data")
-    //        }
-    //        // 3
-    //        let adjustmentData = PHAdjustmentData(
-    //          formatIdentifier: bundleID,
-    //          formatVersion: "1.0",
-    //          data: filterData)
-    //        // 4
-    //        self.editingOutput = PHContentEditingOutput(contentEditingInput: input)
-    //        guard let editingOutput = self.editingOutput else { return }
-    //        editingOutput.adjustmentData = adjustmentData
-    //        // 5
-    //        let fitleredImage = self.imageView.image?.applyFilter(.noir)
-    //        self.imageView.image = fitleredImage
-    //        // 6
-    //        let jpegData = fitleredImage?.jpegData(compressionQuality: 1.0)
-    //        do {
-    //          try jpegData?.write(to: editingOutput.renderedContentURL)
-    //        } catch {
-    //          print(error.localizedDescription)
-    //        }
-    //        // 7
-    //        DispatchQueue.main.async {
-    //          self.saveButton.isEnabled = true
-    //        }
-    //      }
-    //    }
     
 //    func updateUndoButton() {
 //        let adjustmentResources = PHAssetResource.assetResources(for: asset)
@@ -148,7 +106,44 @@ class PhotoViewController: UIViewController {
             completionHandler: completionHandler)
     }
     
-//    func undo() {
+    @IBAction func saveClicked(_ sender: Any) {saveImage()}
+    
+    @objc func acceptButtonClicked() {
+        
+    }
+    
+    @objc func drawOrTextChanged() {
+        switch drawingTool.DrawOrText.selectedSegmentIndex
+            {
+            case 0:
+                drawingEnabled = true
+            case 1:
+                drawingEnabled = false
+            default:
+                break
+            }
+    }
+    
+    @objc func brushButtonClicked() {
+        //TODO: change type of painting
+    }
+    
+    @objc func fontTypeChanged() {
+        fontIndex = drawingTool.fontType.selectedSegmentIndex
+    }
+    
+    @objc func sizeChanged() {
+        lineSize = Double(drawingTool.sizeBar.value)
+    }
+    
+    @objc func colorButtonClicked() {
+        let colorVC = UIColorPickerViewController()
+        colorVC.delegate = self
+        present(colorVC, animated: true)
+    }
+    
+    @objc func undo() {
+        
 //        // 1
 //        let changeRequest: () -> Void = {
 //            let request = PHAssetChangeRequest(for: self.asset)
@@ -168,7 +163,7 @@ class PhotoViewController: UIViewController {
 //        PHPhotoLibrary.shared().performChanges(
 //            changeRequest,
 //            completionHandler: completionHandler)
-//    }
+    }
     
     func getPhoto() {
         photoView.fetchImageAsset(asset, targetSize: photoView.bounds.size, completionHandler: nil)
@@ -177,7 +172,7 @@ class PhotoViewController: UIViewController {
     func createTextImage(text: String)->UIImage?{
         let attributes = [
           NSAttributedString.Key.foregroundColor : UIColor.black,
-          NSAttributedString.Key.font : UIFont(name: "Marker Felt", size: 36.0)!,
+          NSAttributedString.Key.font : UIFont(name: fontTypes[fontIndex], size: lineSize)!,
         ]
         //Create an Attributed String
         let waterfallText = NSAttributedString(string: text, attributes: attributes)
@@ -213,6 +208,12 @@ class PhotoViewController: UIViewController {
     private var textView: UIImageView?
     private var textField : UITextField?
     private var textFromTextField = ""
+    
+    private var currentColor: UIColor = .black
+    private let fontTypes = ["Arial-BoldMT", "HoeflerText-Italic", "Marker Felt"]
+    private var fontIndex = 0
+    private var lineSize = 36.0
+    private var imageArray = [UIImage]()
     
     @objc func eraseDrawing(_ sender: UITapGestureRecognizer? = nil){
         incrementalImage = nil
@@ -638,6 +639,15 @@ extension PhotoViewController: UITextFieldDelegate{
         }
         
         return true
+    }
+}
+
+extension PhotoViewController: UIColorPickerViewControllerDelegate{
+    func colorPickerViewControllerDidFinish(_ viewController: UIColorPickerViewController) {
+        let color = viewController.selectedColor
+        currentColor = color
+        drawingTool.colorButton.backgroundColor = color
+        drawingTool.sizeButton.backgroundColor = color
     }
 }
 
