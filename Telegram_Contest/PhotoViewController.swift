@@ -31,16 +31,15 @@ class PhotoViewController: UIViewController {
         super.init(coder: coder)
     }
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        getPhoto()
-        self.photoView.isMultipleTouchEnabled = false
-        tap = UITapGestureRecognizer(target: self, action: #selector(eraseDrawing(_:)))
-        tap?.numberOfTapsRequired = 2
-        if let tap = tap{
-            self.photoView.addGestureRecognizer(tap)
+    override func viewDidAppear(_ animated: Bool) {
+        if imageArray.isEmpty{
+            imageArray.append(photoView.image)
         }
+        
+        textBackgroundView = UIView(frame: photoView.frame)
+        textBackgroundView?.backgroundColor = .darkGray.withAlphaComponent(0.5)
+        self.view.addSubview(textBackgroundView!)
+        textBackgroundView?.isHidden = true
         
         textField =  UITextField()
         let midX = view.bounds.midX
@@ -57,7 +56,18 @@ class PhotoViewController: UIViewController {
         textField!.delegate = self
             self.view.addSubview(textField!)
         textField!.isHidden = true
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
         
+        getPhoto()
+        self.photoView.isMultipleTouchEnabled = false
+        tap = UITapGestureRecognizer(target: self, action: #selector(eraseDrawing(_:)))
+        tap?.numberOfTapsRequired = 2
+        if let tap = tap{
+            self.photoView.addGestureRecognizer(tap)
+        }
         
         //DrawingTool
         drawingTool.undoButton.addTarget(self, action: #selector(self.undo), for: .touchUpInside)
@@ -68,7 +78,8 @@ class PhotoViewController: UIViewController {
         drawingTool.DrawOrText.addTarget(self, action: #selector(self.drawOrTextChanged), for: .valueChanged)
         drawingTool.acceptButton.addTarget(self, action: #selector(self.acceptButtonClicked), for: .touchUpInside)
         
-        //updateUndoButton() //TODO: uncomment
+        updateUndoButton()
+        drawingTool.acceptButton.isEnabled = false
         PHPhotoLibrary.shared().register(self)
     }
     
@@ -76,40 +87,27 @@ class PhotoViewController: UIViewController {
         PHPhotoLibrary.shared().unregisterChangeObserver(self)
     }
     
-//    func updateUndoButton() {
-//        let adjustmentResources = PHAssetResource.assetResources(for: asset)
-//            .filter { $0.type == .adjustmentData }
-//        undoButton.isEnabled = !adjustmentResources.isEmpty
-//    }
-    
-    func saveImage() {
-        // 1
-        let changeRequest: () -> Void = {
-            let changeRequest = PHAssetChangeRequest(for: self.asset)
-            changeRequest.contentEditingOutput = self.editingOutput
-        }
-        // 2
-        let completionHandler: (Bool, Error?) -> Void = { success, error in
-            guard success else {
-                print("Error: cannot edit asset: \(String(describing: error))")
-                return
-            }
-            // 3
-            self.editingOutput = nil
-            DispatchQueue.main.async {
-                self.saveButton.isEnabled = false
-            }
-        }
-        // 4
-        PHPhotoLibrary.shared().performChanges(
-            changeRequest,
-            completionHandler: completionHandler)
+    func updateUndoButton() {
+        let flag = imageArray.count > 1
+        drawingTool.undoButton.isEnabled = flag
+        drawingTool.undoButton.tintColor = flag ? .darkGray : .lightGray
     }
     
-    @IBAction func saveClicked(_ sender: Any) {saveImage()}
+    @IBAction func saveClicked(_ sender: Any) {
+        let image = imageArray.last!
+        if let image = image{
+            UIImageWriteToSavedPhotosAlbum(image, self, nil, nil)
+        }
+    }
     
     @objc func acceptButtonClicked() {
+        drawImage(textImage, true, textView!.frame.origin)
+        drawingTool.acceptButton.isEnabled = false
         
+        textTouchLocation = nil
+        textView?.removeFromSuperview()
+        textView = nil
+        textImage = nil
     }
     
     @objc func drawOrTextChanged() {
@@ -143,26 +141,12 @@ class PhotoViewController: UIViewController {
     }
     
     @objc func undo() {
-        
-//        // 1
-//        let changeRequest: () -> Void = {
-//            let request = PHAssetChangeRequest(for: self.asset)
-//            request.revertAssetContentToOriginal()
-//        }
-//        // 2
-//        let completionHandler: (Bool, Error?) -> Void = { success, error in
-//            guard success else {
-//                print("Error: can't revert the asset: \(String(describing: error))")
-//                return
-//            }
-//            DispatchQueue.main.async {
-//                self.undoButton.isEnabled = false
-//            }
-//        }
-//        // 3
-//        PHPhotoLibrary.shared().performChanges(
-//            changeRequest,
-//            completionHandler: completionHandler)
+        if imageArray.count > 1{
+            imageArray.removeLast()
+            updateUndoButton()
+            photoView.image = imageArray.last!
+            incrementalImage = imageArray.last!
+        }
     }
     
     func getPhoto() {
@@ -171,12 +155,11 @@ class PhotoViewController: UIViewController {
     
     func createTextImage(text: String)->UIImage?{
         let attributes = [
-          NSAttributedString.Key.foregroundColor : UIColor.black,
+          NSAttributedString.Key.foregroundColor : currentColor,
           NSAttributedString.Key.font : UIFont(name: fontTypes[fontIndex], size: lineSize)!,
         ]
-        //Create an Attributed String
+        
         let waterfallText = NSAttributedString(string: text, attributes: attributes)
-        //Convert attributed string to a CIImage
         let textGenerationFilter = CIFilter(name: "CIAttributedTextImageGenerator")!
         textGenerationFilter.setValue(waterfallText, forKey: "inputText")
         textGenerationFilter.setValue(NSNumber(value: Double(1)), forKey: "inputScaleFactor")
@@ -200,7 +183,7 @@ class PhotoViewController: UIViewController {
     private var isFirstTouchPoint = false
     private var lastSegmentOfPrev: LineSegment?
     private var tap: UITapGestureRecognizer?
-    private var fullPath = UIBezierPath() //TODO: remove
+    private var fullPath = UIBezierPath()
     private var points = [CGPoint]()
     
     private var drawingEnabled = true
@@ -211,29 +194,44 @@ class PhotoViewController: UIViewController {
     
     private var currentColor: UIColor = .black
     private let fontTypes = ["Arial-BoldMT", "HoeflerText-Italic", "Marker Felt"]
+    private var textImage: UIImage?
+    private var textBackgroundView: UIView?
     private var fontIndex = 0
     private var lineSize = 36.0
-    private var imageArray = [UIImage]()
+    private var imageArray = [UIImage?]()
     
     @objc func eraseDrawing(_ sender: UITapGestureRecognizer? = nil){
         incrementalImage = nil
         self.photoView.setNeedsDisplay()
     }
     
+    private func addToImageArray(_ image:UIImage?){
+        imageArray.append(image)
+        updateUndoButton()
+    }
+    
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        let touch = touches.first
+        let location = (touch?.location(in: self.photoView))!
+        
+        if !drawingEnabled && drawingTool.acceptButton.isEnabled{
+            return
+        }
+        
         guard drawingEnabled else {
-            let touch = touches.first
-            guard touch?.view != textView else{ return }
-            textTouchLocation = touch?.location(in: self.photoView)
+            if location.x > photoView.frame.width || location.y > photoView.frame.height{
+                return
+            }
+            textTouchLocation = location
             textField!.isHidden = false
+            textBackgroundView?.isHidden = false
             
             return
         }
         
         ctr = 0
         bufIdx = 0
-        let touch = touches.first
-        pts[0] = (touch?.location(in: self.photoView))!
+        pts[0] = location
         isFirstTouchPoint = true
         lastImage = photoView.image
         fullPath = UIBezierPath()
@@ -241,7 +239,6 @@ class PhotoViewController: UIViewController {
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard drawingEnabled else {
-            textField!.isHidden = true
             let touch = touches.first
             textTouchLocation = touch?.location(in: self.photoView)
             if let textView = textView, let textTouchLocation = textTouchLocation {
@@ -316,8 +313,8 @@ class PhotoViewController: UIViewController {
                 }
                 if let incrementalImage = incrementalImage {
                     incrementalImage.draw(at: .zero)
-                    UIColor.black.setStroke()
-                    UIColor.black.setFill()
+                    currentColor.setStroke()
+                    currentColor.setFill()
                     offsetPath.stroke() // ................. (8)
                     offsetPath.fill()
                 }
@@ -326,7 +323,7 @@ class PhotoViewController: UIViewController {
                 UIGraphicsEndImageContext()
                 offsetPath.removeAllPoints()
                 DispatchQueue.main.async(execute: { [self] in
-                    drawImage()
+                    drawImage(incrementalImage, false, nil)
                     bufIdx = 0
                     self.photoView.setNeedsDisplay()
                 })
@@ -335,10 +332,6 @@ class PhotoViewController: UIViewController {
             pts[1] = pts[4]
             ctr = 1
         }
-    }
-    
-    func drawRect(rect: CGRect){
-        incrementalImage?.draw(in: rect)
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -383,8 +376,8 @@ class PhotoViewController: UIViewController {
         var incImage = UIGraphicsGetImageFromCurrentImageContext()
         
         incImage!.draw(at: .zero)
-        UIColor.black.setStroke()
-        UIColor.black.setFill()
+        currentColor.setStroke()
+        currentColor.setFill()
         fullPath.stroke()
         fullPath.fill()
         incImage = UIGraphicsGetImageFromCurrentImageContext()
@@ -393,6 +386,8 @@ class PhotoViewController: UIViewController {
         incImage!.draw(in: CGRect(origin: .zero, size: bounds.size))
         let newImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
+        
+        addToImageArray(newImage)
         
         return newImage
     }
@@ -408,7 +403,7 @@ class PhotoViewController: UIViewController {
 
         let rectangle = CGRect(x: clResult.x, y: clResult.y, width: clResult.width, height: clResult.height)
 
-        UIColor.black.setFill()
+        currentColor.setFill()
         UIRectFrame(rectangle)
 
         incImage = UIGraphicsGetImageFromCurrentImageContext()
@@ -417,6 +412,9 @@ class PhotoViewController: UIViewController {
         incImage!.draw(in: CGRect(origin: .zero, size: bounds.size))
         let newImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
+        
+        addToImageArray(newImage)
+        
         return newImage
     }
     
@@ -432,8 +430,8 @@ class PhotoViewController: UIViewController {
         var incImage = UIGraphicsGetImageFromCurrentImageContext()
 
         incImage!.draw(at: .zero)
-        UIColor.black.setStroke()
-        UIColor.clear.setFill()
+        currentColor.setStroke()
+        currentColor.setFill()
         path.stroke()
         path.fill()
         incImage = UIGraphicsGetImageFromCurrentImageContext()
@@ -443,18 +441,30 @@ class PhotoViewController: UIViewController {
         let newImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         
+        addToImageArray(newImage)
+        
         return newImage
     }
     
-    private func drawImage(){
+    private func drawImage(_ incrementalImage:UIImage?, _ saveImage: Bool, _ location: CGPoint?){
         if let incrementalImage = incrementalImage, let image = self.photoView.image{
             let size = self.photoView.bounds.size
             UIGraphicsBeginImageContextWithOptions(size, true, 0.0)
             image.draw(in: CGRect(origin: .zero, size: size))
-            incrementalImage.draw(in: CGRect(origin: .zero, size: size))
+            
+            if let location = location {
+                let size = incrementalImage.size
+                incrementalImage.draw(in: CGRect(origin: location, size: size))
+            }else{
+                incrementalImage.draw(in: CGRect(origin: .zero, size: size))
+            }
+            
             let newImage = UIGraphicsGetImageFromCurrentImageContext()
             UIGraphicsEndImageContext()
             self.photoView.image = newImage
+            if saveImage{
+                addToImageArray(newImage)
+            }
         }
     }
     
@@ -600,23 +610,12 @@ class PhotoViewController: UIViewController {
 
 extension PhotoViewController: PHPhotoLibraryChangeObserver {
     func photoLibraryDidChange(_ changeInstance: PHChange) {
-        // 2
-        guard
-            let change = changeInstance.changeDetails(for: asset),
-            let updatedAsset = change.objectAfterChanges
-        else { return }
-        // 3
         DispatchQueue.main.sync {
-            // 4
-            asset = updatedAsset
-            photoView.fetchImageAsset(
-                asset,
-                targetSize: view.bounds.size
-            ) { [weak self] _ in
-                guard let self = self else { return }
-                // 5
-                //self.updateUndoButton() //TODO: uncomment
-            }
+            let lastImage = imageArray.last!
+            imageArray.removeAll()
+            imageArray.append(lastImage)
+            
+            updateUndoButton()
         }
     }
 }
@@ -629,14 +628,18 @@ extension PhotoViewController: UITextFieldDelegate{
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textFromTextField = textField.text!
         textField.isHidden = true
+        textBackgroundView?.isHidden = true
         self.view.endEditing(true)
         
-        let textImage = createTextImage(text: textFromTextField)
+        textImage = createTextImage(text: textFromTextField)
         textView = UIImageView(image: textImage)
         if let textView = textView, let textTouchLocation = textTouchLocation {
             textView.center = textTouchLocation
             photoView.addSubview(textView)
         }
+        drawingTool.acceptButton.isEnabled = true
+        textFromTextField = ""
+        textField.text = textFromTextField
         
         return true
     }

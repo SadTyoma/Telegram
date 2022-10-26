@@ -24,17 +24,17 @@
         </placeholder>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <view contentMode="scaleToFill" id="iN0-l3-epB">
-            <rect key="frame" x="0.0" y="0.0" width="500" height="164"/>
+            <rect key="frame" x="0.0" y="0.0" width="390" height="130"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="85S-0z-d83">
-                    <rect key="frame" x="0.0" y="0.0" width="500" height="163.5"/>
+                    <rect key="frame" x="0.0" y="0.0" width="390" height="130"/>
                     <subviews>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="I89-8t-UQl">
-                            <rect key="frame" x="8" y="0.0" width="82.5" height="155.5"/>
+                            <rect key="frame" x="8" y="0.0" width="64.5" height="122"/>
                             <subviews>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ujx-8J-xWY">
-                                    <rect key="frame" x="0.0" y="10" width="60" height="60"/>
+                                    <rect key="frame" x="0.0" y="10" width="42" height="42"/>
                                     <constraints>
                                         <constraint firstAttribute="width" secondItem="Ujx-8J-xWY" secondAttribute="height" multiplier="1:1" id="tKR-ad-Zuj"/>
                                     </constraints>
@@ -46,7 +46,7 @@
                                     </connections>
                                 </button>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2VK-6S-rtW">
-                                    <rect key="frame" x="0.0" y="84.5" width="61" height="60.5"/>
+                                    <rect key="frame" x="0.0" y="68.5" width="43" height="43"/>
                                     <constraints>
                                         <constraint firstAttribute="width" secondItem="2VK-6S-rtW" secondAttribute="height" multiplier="1:1" id="kaz-we-Epp"/>
                                     </constraints>
@@ -70,10 +70,10 @@
                             </constraints>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="A6D-qR-Lyy">
-                            <rect key="frame" x="79.5" y="0.0" width="337" height="155.5"/>
+                            <rect key="frame" x="61.5" y="0.0" width="261.5" height="122"/>
                             <subviews>
                                 <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="iJc-LG-pHA">
-                                    <rect key="frame" x="0.0" y="109.5" width="386.5" height="46"/>
+                                    <rect key="frame" x="0.0" y="92" width="240.5" height="30"/>
                                     <constraints>
                                         <constraint firstAttribute="width" secondItem="iJc-LG-pHA" secondAttribute="height" multiplier="278:31" constant="-19.967741935483843" id="hiv-h2-tGJ"/>
                                     </constraints>
@@ -86,7 +86,7 @@
                                     </connections>
                                 </segmentedControl>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TMN-Bp-iqe">
-                                    <rect key="frame" x="20" y="14" width="64.5" height="87.5"/>
+                                    <rect key="frame" x="20" y="14" width="40.5" height="70"/>
                                     <constraints>
                                         <constraint firstAttribute="width" secondItem="TMN-Bp-iqe" secondAttribute="height" multiplier="43:31" constant="-56.645161290322591" id="SSb-7W-voL"/>
                                     </constraints>
@@ -99,10 +99,10 @@
                                     </connections>
                                 </button>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Zto-3l-VWE">
-                                    <rect key="frame" x="0.0" y="14" width="336" height="96"/>
+                                    <rect key="frame" x="0.0" y="14" width="260.5" height="78.5"/>
                                     <subviews>
                                         <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="XMe-Ol-H0X">
-                                            <rect key="frame" x="0.0" y="10" width="389" height="47.5"/>
+                                            <rect key="frame" x="0.0" y="10" width="240" height="30"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" secondItem="XMe-Ol-H0X" secondAttribute="height" multiplier="257:30" constant="-8.1333333333333258" id="GOl-xN-k51"/>
                                             </constraints>
@@ -127,10 +127,10 @@
                                     </constraints>
                                 </view>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Tei-Aa-AOa">
-                                    <rect key="frame" x="-11" y="0.0" width="338.5" height="110"/>
+                                    <rect key="frame" x="-11" y="0.0" width="284.5" height="92.5"/>
                                     <subviews>
                                         <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="3Lt-3w-eRC">
-                                            <rect key="frame" x="6" y="26" width="334.5" height="44.5"/>
+                                            <rect key="frame" x="6" y="26" width="257.5" height="27"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" secondItem="3Lt-3w-eRC" secondAttribute="height" multiplier="255:29" constant="25.206896551724185" id="jy0-wt-Qhc"/>
                                             </constraints>
@@ -167,10 +167,10 @@
                             </constraints>
                         </view>
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="h1m-Ob-M8O">
-                            <rect key="frame" x="430.5" y="6" width="71" height="149.5"/>
+                            <rect key="frame" x="337" y="6" width="57.5" height="116"/>
                             <subviews>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="d24-CL-UZR">
-                                    <rect key="frame" x="0.0" y="90" width="56" height="55.5"/>
+                                    <rect key="frame" x="0.0" y="69.5" width="42.5" height="42.5"/>
                                     <constraints>
                                         <constraint firstAttribute="width" secondItem="d24-CL-UZR" secondAttribute="height" multiplier="1:1" id="Vbh-z0-60T"/>
                                     </constraints>
@@ -182,7 +182,7 @@
                                     </connections>
                                 </button>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" hasAttributedTitle="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rAi-8C-ib4">
-                                    <rect key="frame" x="-6" y="0.0" width="62" height="62"/>
+                                    <rect key="frame" x="1.5" y="0.0" width="41" height="41.5"/>
                                     <constraints>
                                         <constraint firstAttribute="width" secondItem="rAi-8C-ib4" secondAttribute="height" multiplier="1:1" id="9im-gr-Je3"/>
                                     </constraints>
@@ -244,7 +244,7 @@
                 <constraint firstItem="85S-0z-d83" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="wFX-gd-uNK"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
-            <point key="canvasLocation" x="210.1449275362319" y="91.071428571428569"/>
+            <point key="canvasLocation" x="130.43478260869566" y="79.6875"/>
         </view>
     </objects>
     <resources>

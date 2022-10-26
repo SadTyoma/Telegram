@@ -116,10 +116,10 @@
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="plain" image="square.and.arrow.down" catalog="system"/>
+                                <connections>
+                                    <action selector="saveClicked:" destination="13D-0h-Evb" eventType="touchUpInside" id="OYp-5k-YoN"/>
+                                </connections>
                             </button>
-                            <connections>
-                                <action selector="saveClicked:" destination="13D-0h-Evb" id="O8I-yr-Gku"/>
-                            </connections>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
