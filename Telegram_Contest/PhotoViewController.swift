@@ -54,7 +54,7 @@ class PhotoViewController: UIViewController {
         textField!.clearButtonMode = UITextField.ViewMode.whileEditing
         textField!.contentVerticalAlignment = UIControl.ContentVerticalAlignment.center
         textField!.delegate = self
-            self.view.addSubview(textField!)
+        self.view.addSubview(textField!)
         textField!.isHidden = true
     }
     
@@ -112,14 +112,18 @@ class PhotoViewController: UIViewController {
     
     @objc func drawOrTextChanged() {
         switch drawingTool.DrawOrText.selectedSegmentIndex
-            {
-            case 0:
-                drawingEnabled = true
-            case 1:
-                drawingEnabled = false
-            default:
-                break
+        {
+        case 0:
+            drawingEnabled = true
+            if !textField!.isHidden{
+                textField!.isHidden = true
+                textBackgroundView?.isHidden = true
             }
+        case 1:
+            drawingEnabled = false
+        default:
+            break
+        }
     }
     
     @objc func brushButtonClicked() {
@@ -155,8 +159,8 @@ class PhotoViewController: UIViewController {
     
     func createTextImage(text: String)->UIImage?{
         let attributes = [
-          NSAttributedString.Key.foregroundColor : currentColor,
-          NSAttributedString.Key.font : UIFont(name: fontTypes[fontIndex], size: textSize)!,
+            NSAttributedString.Key.foregroundColor : currentColor,
+            NSAttributedString.Key.font : UIFont(name: fontTypes[fontIndex], size: textSize)!,
         ]
         
         let waterfallText = NSAttributedString(string: text, attributes: attributes)
@@ -164,7 +168,7 @@ class PhotoViewController: UIViewController {
         textGenerationFilter.setValue(waterfallText, forKey: "inputText")
         textGenerationFilter.setValue(NSNumber(value: Double(1)), forKey: "inputScaleFactor")
         guard  let outputImage = textGenerationFilter.outputImage else { return nil }
-
+        
         return UIImage(ciImage: outputImage)
     }
     
@@ -264,21 +268,21 @@ class PhotoViewController: UIViewController {
         pts[ctr] = p!
         if ctr == 4 {
             pts[3] = CGPoint(x: (pts[2].x + pts[4].x) / 2.0, y: (pts[2].y + pts[4].y) / 2.0)
-
+            
             for i in 0..<4 {
                 pointsBuffer[bufIdx + i] = pts[i]
             }
-
+            
             bufIdx += 4
-
+            
             let bounds = self.photoView.bounds
-
+            
             drawingQueue.async(execute: { [self] in
                 let offsetPath = UIBezierPath() // ................. (2)
                 if bufIdx == 0 {
                     return
                 }
-
+                
                 var ls = [LineSegment](repeating: LineSegment(firstPoint: CGPoint.zero, secondPoint: CGPoint.zero), count: 4)
                 var i = 0
                 while i < bufIdx {
@@ -292,14 +296,14 @@ class PhotoViewController: UIViewController {
                             ls[0] = lastSegmentOfPrev
                         }
                     }
-
+                    
                     let frac1: Double = FF / clamp(len_sq(pointsBuffer[i], pointsBuffer[i + 1]), LOWER, UPPER) // ................. (4)
                     let frac2: Double = FF / clamp(len_sq(pointsBuffer[i + 1], pointsBuffer[i + 2]), LOWER, UPPER)
                     let frac3: Double = FF / clamp(len_sq(pointsBuffer[i + 2], pointsBuffer[i + 3]), LOWER, UPPER)
                     ls[1] = lineSegmentPerpendicular(to: LineSegment(firstPoint: pointsBuffer[i], secondPoint: pointsBuffer[i + 1]), ofRelativeLength: frac1) // ................. (5)
                     ls[2] = lineSegmentPerpendicular(to: LineSegment(firstPoint: pointsBuffer[i + 1], secondPoint: pointsBuffer[i + 2]), ofRelativeLength: frac2)
                     ls[3] = lineSegmentPerpendicular(to: LineSegment(firstPoint: pointsBuffer[i + 2], secondPoint: pointsBuffer[i + 3]), ofRelativeLength: frac3)
-
+                    
                     offsetPath.move(to: ls[0].firstPoint)
                     fullPath.move(to: ls[0].firstPoint)
                     
@@ -358,13 +362,9 @@ class PhotoViewController: UIViewController {
             newImage = drawCircle(classificationResult)
         default:
             newImage = drawUnknown()
-            //self.photoView.image = newImage
             incrementalImage = newImage
             points = [CGPoint]()
             fullPath.removeAllPoints()
-            //self.photoView.setNeedsDisplay()
-            
-            //return
         }
         
         UIView.transition(with: photoView,
@@ -407,21 +407,21 @@ class PhotoViewController: UIViewController {
     func drawRectangle(_ clResult: ClassificationResult) -> UIImage? {
         guard let image = lastImage else {return nil}
         let bounds = self.photoView.bounds
-
+        
         UIGraphicsBeginImageContextWithOptions(bounds.size, true, 0.0)
         image.draw(in: CGRect(origin: .zero, size: bounds.size))
         var incImage = UIGraphicsGetImageFromCurrentImageContext()
         incImage!.draw(at: .zero)
-
+        
         let rectangle = CGRect(x: clResult.x, y: clResult.y, width: clResult.width, height: clResult.height)
         let context = UIGraphicsGetCurrentContext()
         context!.setLineWidth(prelineSize);
-
+        
         currentColor.setFill()
         UIRectFrame(rectangle)
-
+        
         incImage = UIGraphicsGetImageFromCurrentImageContext()
-
+        
         image.draw(in: CGRect(origin: .zero, size: bounds.size))
         incImage!.draw(in: CGRect(origin: .zero, size: bounds.size))
         let newImage = UIGraphicsGetImageFromCurrentImageContext()
@@ -442,13 +442,13 @@ class PhotoViewController: UIViewController {
         UIGraphicsBeginImageContextWithOptions(bounds.size, true, 0.0)
         image.draw(in: CGRect(origin: .zero, size: bounds.size))
         var incImage = UIGraphicsGetImageFromCurrentImageContext()
-
+        
         incImage!.draw(at: .zero)
         currentColor.setStroke()
         path.lineWidth = prelineSize
         path.stroke()
         incImage = UIGraphicsGetImageFromCurrentImageContext()
-
+        
         image.draw(in: CGRect(origin: .zero, size: bounds.size))
         incImage!.draw(in: CGRect(origin: .zero, size: bounds.size))
         let newImage = UIGraphicsGetImageFromCurrentImageContext()
@@ -490,7 +490,7 @@ class PhotoViewController: UIViewController {
         var top = self.photoView.bounds.height
         var right = 0.0
         var bottom = 0.0
-
+        
         for point in points {
             if left > point.x{
                 left = point.x
@@ -584,12 +584,12 @@ class PhotoViewController: UIViewController {
         let y0 = pp.firstPoint.y
         let x1 = pp.secondPoint.x
         let y1 = pp.secondPoint.y
-
+        
         var dx: CGFloat
         var dy: CGFloat
         dx = x1 - x0
         dy = y1 - y0
-
+        
         var xa: CGFloat
         var ya: CGFloat
         var xb: CGFloat
@@ -598,9 +598,9 @@ class PhotoViewController: UIViewController {
         ya = y1 - CGFloat(fraction / 2) * dx
         xb = x1 - CGFloat(fraction / 2) * dy
         yb = y1 + CGFloat(fraction / 2) * dx
-
+        
         return LineSegment(firstPoint: CGPoint(x: xa, y: ya), secondPoint: CGPoint(x: xb, y: yb))
-
+        
     }
     
     private func len_sq(_ p1: CGPoint,_ p2: CGPoint)->Double{
