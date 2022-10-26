@@ -131,7 +131,7 @@ class PhotoViewController: UIViewController {
     }
     
     @objc func sizeChanged() {
-        lineSize = Double(drawingTool.sizeBar.value)
+        textSize = Double(drawingTool.sizeBar.value)
     }
     
     @objc func colorButtonClicked() {
@@ -156,7 +156,7 @@ class PhotoViewController: UIViewController {
     func createTextImage(text: String)->UIImage?{
         let attributes = [
           NSAttributedString.Key.foregroundColor : currentColor,
-          NSAttributedString.Key.font : UIFont(name: fontTypes[fontIndex], size: lineSize)!,
+          NSAttributedString.Key.font : UIFont(name: fontTypes[fontIndex], size: textSize)!,
         ]
         
         let waterfallText = NSAttributedString(string: text, attributes: attributes)
@@ -197,7 +197,17 @@ class PhotoViewController: UIViewController {
     private var textImage: UIImage?
     private var textBackgroundView: UIView?
     private var fontIndex = 0
-    private var lineSize = 36.0
+    private var textSize = 36.0
+    private var prelineSize: Double{
+        get{
+            return textSize / 8
+        }
+    }
+    private var lineSize: Double{
+        get{
+            return textSize / 12
+        }
+    }
     private var imageArray = [UIImage?]()
     
     @objc func eraseDrawing(_ sender: UITapGestureRecognizer? = nil){
@@ -315,6 +325,7 @@ class PhotoViewController: UIViewController {
                     incrementalImage.draw(at: .zero)
                     currentColor.setStroke()
                     currentColor.setFill()
+                    offsetPath.lineWidth = prelineSize
                     offsetPath.stroke() // ................. (8)
                     offsetPath.fill()
                 }
@@ -347,13 +358,13 @@ class PhotoViewController: UIViewController {
             newImage = drawCircle(classificationResult)
         default:
             newImage = drawUnknown()
-            self.photoView.image = newImage
+            //self.photoView.image = newImage
             incrementalImage = newImage
             points = [CGPoint]()
             fullPath.removeAllPoints()
-            self.photoView.setNeedsDisplay()
+            //self.photoView.setNeedsDisplay()
             
-            return
+            //return
         }
         
         UIView.transition(with: photoView,
@@ -378,6 +389,7 @@ class PhotoViewController: UIViewController {
         incImage!.draw(at: .zero)
         currentColor.setStroke()
         currentColor.setFill()
+        fullPath.lineWidth = lineSize
         fullPath.stroke()
         fullPath.fill()
         incImage = UIGraphicsGetImageFromCurrentImageContext()
@@ -402,6 +414,8 @@ class PhotoViewController: UIViewController {
         incImage!.draw(at: .zero)
 
         let rectangle = CGRect(x: clResult.x, y: clResult.y, width: clResult.width, height: clResult.height)
+        let context = UIGraphicsGetCurrentContext()
+        context!.setLineWidth(prelineSize);
 
         currentColor.setFill()
         UIRectFrame(rectangle)
@@ -431,9 +445,8 @@ class PhotoViewController: UIViewController {
 
         incImage!.draw(at: .zero)
         currentColor.setStroke()
-        currentColor.setFill()
+        path.lineWidth = prelineSize
         path.stroke()
-        path.fill()
         incImage = UIGraphicsGetImageFromCurrentImageContext()
 
         image.draw(in: CGRect(origin: .zero, size: bounds.size))

@@ -77,8 +77,8 @@ class DrawAndTextView: UIView {
         sizeButton.layer.borderWidth = 2
         sizeButton.layer.borderColor = UIColor.white.cgColor
         
-        sizeBar.maximumValue = 40
-        sizeBar.minimumValue = 10
+        sizeBar.maximumValue = 80
+        sizeBar.minimumValue = 20
         sizeBar.value = 36
     }
     
