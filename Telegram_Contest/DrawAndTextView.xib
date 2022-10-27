@@ -15,6 +15,7 @@
                 <outlet property="brushButton" destination="TMN-Bp-iqe" id="HYb-hy-pXa"/>
                 <outlet property="colorButton" destination="Ujx-8J-xWY" id="Hqs-xm-pT5"/>
                 <outlet property="fontType" destination="XMe-Ol-H0X" id="Dqh-l8-f6y"/>
+                <outlet property="imageTip" destination="Wrb-8p-MIr" id="nEH-fl-uCY"/>
                 <outlet property="sizeBar" destination="3Lt-3w-eRC" id="1mC-yN-mqm"/>
                 <outlet property="sizeButton" destination="rAi-8C-ib4" id="ala-G4-Hk0"/>
                 <outlet property="sizeView" destination="Tei-Aa-AOa" id="hwS-8c-zWe"/>
@@ -124,10 +125,26 @@
                         <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="A6D-qR-Lyy">
                             <rect key="frame" x="62" y="0.0" width="267" height="130"/>
                             <subviews>
-                                <button opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TMN-Bp-iqe">
-                                    <rect key="frame" x="0.0" y="0.0" width="62" height="130"/>
+                                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MuG-Ee-15U">
+                                    <rect key="frame" x="0.0" y="0.0" width="267" height="130"/>
+                                    <subviews>
+                                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="brush-1" translatesAutoresizingMaskIntoConstraints="NO" id="Wrb-8p-MIr">
+                                            <rect key="frame" x="0.0" y="0.0" width="62" height="130"/>
+                                        </imageView>
+                                    </subviews>
+                                    <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                     <constraints>
-                                        <constraint firstAttribute="width" secondItem="TMN-Bp-iqe" secondAttribute="height" multiplier="31:65" id="7k4-Ew-9Pb"/>
+                                        <constraint firstItem="Wrb-8p-MIr" firstAttribute="top" secondItem="MuG-Ee-15U" secondAttribute="top" id="3Gg-5G-0nd"/>
+                                        <constraint firstAttribute="trailing" secondItem="Wrb-8p-MIr" secondAttribute="trailing" constant="205" id="9t6-pX-N11"/>
+                                        <constraint firstItem="Wrb-8p-MIr" firstAttribute="leading" secondItem="MuG-Ee-15U" secondAttribute="leading" id="FDX-ya-aGe"/>
+                                        <constraint firstAttribute="width" secondItem="MuG-Ee-15U" secondAttribute="height" multiplier="31:65" constant="205" id="axz-Cs-noM"/>
+                                        <constraint firstAttribute="bottom" secondItem="Wrb-8p-MIr" secondAttribute="bottom" id="llw-WJ-uBF"/>
+                                    </constraints>
+                                </view>
+                                <button opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TMN-Bp-iqe">
+                                    <rect key="frame" x="0.0" y="41" width="62" height="89"/>
+                                    <constraints>
+                                        <constraint firstAttribute="width" secondItem="TMN-Bp-iqe" secondAttribute="height" multiplier="31:65" constant="19.553846153846152" id="7k4-Ew-9Pb"/>
                                     </constraints>
                                     <state key="normal" title="Button"/>
                                     <buttonConfiguration key="configuration" style="plain" image="brush">
@@ -207,7 +224,9 @@
                                 <constraint firstAttribute="bottom" secondItem="TMN-Bp-iqe" secondAttribute="bottom" id="4U8-fh-Tj4"/>
                                 <constraint firstAttribute="trailing" secondItem="Zto-3l-VWE" secondAttribute="trailing" id="LFf-Xo-y8D"/>
                                 <constraint firstItem="Zto-3l-VWE" firstAttribute="leading" secondItem="A6D-qR-Lyy" secondAttribute="leading" id="MDx-kp-a5c"/>
+                                <constraint firstItem="MuG-Ee-15U" firstAttribute="top" secondItem="A6D-qR-Lyy" secondAttribute="top" id="Vsd-gX-n1f"/>
                                 <constraint firstItem="Czo-ff-0cc" firstAttribute="top" secondItem="Tei-Aa-AOa" secondAttribute="bottom" constant="-3" id="WW3-ya-euL"/>
+                                <constraint firstItem="MuG-Ee-15U" firstAttribute="leading" secondItem="A6D-qR-Lyy" secondAttribute="leading" id="WdT-kR-MJe"/>
                                 <constraint firstItem="TMN-Bp-iqe" firstAttribute="leading" secondItem="A6D-qR-Lyy" secondAttribute="leading" id="WhA-Cj-xxt"/>
                                 <constraint firstAttribute="trailing" secondItem="Czo-ff-0cc" secondAttribute="trailing" id="XW4-nX-dai"/>
                                 <constraint firstAttribute="bottom" secondItem="Czo-ff-0cc" secondAttribute="bottom" id="Yel-dr-prJ"/>
@@ -217,7 +236,8 @@
                                 <constraint firstItem="Zto-3l-VWE" firstAttribute="top" secondItem="A6D-qR-Lyy" secondAttribute="top" id="rkr-oe-gSM"/>
                                 <constraint firstItem="Czo-ff-0cc" firstAttribute="leading" secondItem="A6D-qR-Lyy" secondAttribute="leading" id="tdt-vp-eUv"/>
                                 <constraint firstAttribute="trailing" secondItem="Tei-Aa-AOa" secondAttribute="trailing" id="vnn-R0-cLj"/>
-                                <constraint firstItem="TMN-Bp-iqe" firstAttribute="top" secondItem="A6D-qR-Lyy" secondAttribute="top" id="zQq-3T-Eiw"/>
+                                <constraint firstAttribute="bottom" secondItem="MuG-Ee-15U" secondAttribute="bottom" id="yn3-rY-7fr"/>
+                                <constraint firstItem="TMN-Bp-iqe" firstAttribute="top" secondItem="A6D-qR-Lyy" secondAttribute="top" constant="41" id="zQq-3T-Eiw"/>
                             </constraints>
                         </view>
                     </subviews>
@@ -257,6 +277,7 @@
     <resources>
         <image name="arrow.uturn.left" catalog="system" width="128" height="112"/>
         <image name="brush" width="40" height="176"/>
+        <image name="brush-1" width="40" height="176"/>
         <image name="checkmark" catalog="system" width="128" height="114"/>
         <image name="paintpalette.fill" catalog="system" width="128" height="105"/>
         <image name="textformat.size" catalog="system" width="128" height="80"/>

@@ -18,6 +18,7 @@ class DrawAndTextView: UIView {
     @IBOutlet weak var sizeView: UIView!
     @IBOutlet weak var sizeButton: UIButton!
     @IBOutlet weak var sizeBar: UISlider!
+    @IBOutlet weak var imageTip: UIImageView!
     
     var sizeViewState = false
     @IBAction func sizeButtonClicked(_ sender: Any){
@@ -59,12 +60,9 @@ class DrawAndTextView: UIView {
         
         sizeView.isHidden = true
         
-//        let image = UIImage(named: "brush.png")
-//        let newimage = resizeImage(image: image!, targetSize: brushButton.frame.size)
-//        brushButton.setImage(newimage, for: .normal)
-        
-        colorButton.backgroundColor = .black
-        sizeButton.backgroundColor = .black
+        let image = UIImage(named: "brush-1")?.withRenderingMode(.alwaysTemplate)
+        imageTip.image = image
+        imageTip.tintColor = .black
                 
         acceptButton.isEnabled = false
         textView.isHidden = true

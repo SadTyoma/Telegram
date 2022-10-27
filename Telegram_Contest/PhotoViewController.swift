@@ -662,8 +662,7 @@ extension PhotoViewController: UIColorPickerViewControllerDelegate{
     func colorPickerViewControllerDidFinish(_ viewController: UIColorPickerViewController) {
         let color = viewController.selectedColor
         currentColor = color
-        drawingTool.colorButton.backgroundColor = color
-        drawingTool.sizeButton.backgroundColor = color
+        drawingTool.imageTip.tintColor = color
     }
 }
 
