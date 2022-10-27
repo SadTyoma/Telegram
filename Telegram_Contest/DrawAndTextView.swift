@@ -59,9 +59,9 @@ class DrawAndTextView: UIView {
         
         sizeView.isHidden = true
         
-        let image = UIImage(named: "brush.png")
-        let newimage = resizeImage(image: image!, targetSize: brushButton.frame.size)
-        brushButton.setImage(newimage, for: .normal)
+//        let image = UIImage(named: "brush.png")
+//        let newimage = resizeImage(image: image!, targetSize: brushButton.frame.size)
+//        brushButton.setImage(newimage, for: .normal)
         
         colorButton.backgroundColor = .black
         sizeButton.backgroundColor = .black
