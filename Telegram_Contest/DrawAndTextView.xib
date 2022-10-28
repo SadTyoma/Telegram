@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -162,6 +163,7 @@
                                     <subviews>
                                         <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="iJc-LG-pHA">
                                             <rect key="frame" x="0.0" y="0.0" width="267" height="32"/>
+                                            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                             <segments>
                                                 <segment title="Drawing"/>
                                                 <segment title="Text"/>
@@ -228,6 +230,7 @@
                                 <constraint firstAttribute="trailing" secondItem="Zto-3l-VWE" secondAttribute="trailing" id="LFf-Xo-y8D"/>
                                 <constraint firstItem="Zto-3l-VWE" firstAttribute="leading" secondItem="A6D-qR-Lyy" secondAttribute="leading" id="MDx-kp-a5c"/>
                                 <constraint firstItem="MuG-Ee-15U" firstAttribute="top" secondItem="A6D-qR-Lyy" secondAttribute="top" id="Vsd-gX-n1f"/>
+                                <constraint firstAttribute="bottom" secondItem="Czo-ff-0cc" secondAttribute="bottom" id="WQp-oy-3k7"/>
                                 <constraint firstItem="Czo-ff-0cc" firstAttribute="top" secondItem="Tei-Aa-AOa" secondAttribute="bottom" constant="-3" id="WW3-ya-euL"/>
                                 <constraint firstItem="MuG-Ee-15U" firstAttribute="leading" secondItem="A6D-qR-Lyy" secondAttribute="leading" id="WdT-kR-MJe"/>
                                 <constraint firstItem="MuG-Ee-15U" firstAttribute="top" secondItem="A6D-qR-Lyy" secondAttribute="top" id="XUZ-G8-OT2"/>
@@ -272,19 +275,19 @@
                 <constraint firstItem="85S-0z-d83" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="EGI-GQ-eez"/>
                 <constraint firstItem="85S-0z-d83" firstAttribute="trailing" secondItem="vUN-kp-3ea" secondAttribute="trailing" id="WYP-dk-a33"/>
                 <constraint firstItem="85S-0z-d83" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" id="Xo8-gu-0QK"/>
-                <constraint firstItem="85S-0z-d83" firstAttribute="bottom" secondItem="vUN-kp-3ea" secondAttribute="bottom" id="Zmy-QW-hdm"/>
+                <constraint firstItem="85S-0z-d83" firstAttribute="bottom" secondItem="iN0-l3-epB" secondAttribute="bottom" id="Zmy-QW-hdm"/>
             </constraints>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <point key="canvasLocation" x="130.43478260869566" y="79.6875"/>
         </view>
     </objects>
     <resources>
-        <image name="arrow.uturn.left" catalog="system" width="128" height="112"/>
+        <image name="arrow.uturn.left" catalog="system" width="128" height="113"/>
         <image name="checkmark" catalog="system" width="128" height="114"/>
         <image name="paintpalette.fill" catalog="system" width="128" height="105"/>
         <image name="pencil" width="40" height="176"/>
-        <image name="pencil-tip" width="62" height="85"/>
-        <image name="textformat.size" catalog="system" width="128" height="80"/>
+        <image name="pencil-tip" width="118" height="85"/>
+        <image name="textformat.size" catalog="system" width="128" height="79"/>
         <systemColor name="secondarySystemGroupedBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		9A3AD6A728F9D4F70081D705 /* PhotoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3AD6A628F9D4F70081D705 /* PhotoViewController.swift */; };
 		9A3AD6AB28F9DD8C0081D705 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3AD6AA28F9DD8C0081D705 /* MainViewController.swift */; };
+		9A4BA22E290C56730042CFAE /* UIImageViewExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4BA22D290C56730042CFAE /* UIImageViewExt.swift */; };
 		9A892E782907131B00BFA056 /* DrawAndTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A892E772907131B00BFA056 /* DrawAndTextView.swift */; };
 		9A892E7A2907132D00BFA056 /* DrawAndTextView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9A892E792907132D00BFA056 /* DrawAndTextView.xib */; };
 		9AC86AF428F81D5A00353DAD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AC86AF328F81D5A00353DAD /* AppDelegate.swift */; };
@@ -24,6 +25,7 @@
 /* Begin PBXFileReference section */
 		9A3AD6A628F9D4F70081D705 /* PhotoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoViewController.swift; sourceTree = "<group>"; };
 		9A3AD6AA28F9DD8C0081D705 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
+		9A4BA22D290C56730042CFAE /* UIImageViewExt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageViewExt.swift; sourceTree = "<group>"; };
 		9A892E772907131B00BFA056 /* DrawAndTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawAndTextView.swift; sourceTree = "<group>"; };
 		9A892E792907132D00BFA056 /* DrawAndTextView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DrawAndTextView.xib; sourceTree = "<group>"; };
 		9AC86AF028F81D5A00353DAD /* Telegram_Contest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Telegram_Contest.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -72,6 +74,7 @@
 				9AC86AF528F81D5A00353DAD /* SceneDelegate.swift */,
 				9AC86AF728F81D5A00353DAD /* PhotosCollectionViewController.swift */,
 				9A3AD6A628F9D4F70081D705 /* PhotoViewController.swift */,
+				9A4BA22D290C56730042CFAE /* UIImageViewExt.swift */,
 				9A892E772907131B00BFA056 /* DrawAndTextView.swift */,
 				9A892E792907132D00BFA056 /* DrawAndTextView.xib */,
 				9AC86B0B28F89A1100353DAD /* PhotoCollectionViewCell.swift */,
@@ -158,6 +161,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9AC86AF828F81D5A00353DAD /* PhotosCollectionViewController.swift in Sources */,
+				9A4BA22E290C56730042CFAE /* UIImageViewExt.swift in Sources */,
 				9AC86B0828F8273400353DAD /* Image.swift in Sources */,
 				9A892E782907131B00BFA056 /* DrawAndTextView.swift in Sources */,
 				9AC86AF428F81D5A00353DAD /* AppDelegate.swift in Sources */,
