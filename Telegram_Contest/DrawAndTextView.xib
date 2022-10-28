@@ -128,32 +128,35 @@
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="MuG-Ee-15U">
                                     <rect key="frame" x="0.0" y="0.0" width="267" height="130"/>
                                     <subviews>
-                                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="brush-1" translatesAutoresizingMaskIntoConstraints="NO" id="Wrb-8p-MIr">
-                                            <rect key="frame" x="0.0" y="0.0" width="62" height="130"/>
+                                        <button opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TMN-Bp-iqe">
+                                            <rect key="frame" x="0.0" y="36" width="70" height="94"/>
+                                            <constraints>
+                                                <constraint firstAttribute="width" secondItem="TMN-Bp-iqe" secondAttribute="height" multiplier="53:47" constant="-36" id="Lub-4X-wdk"/>
+                                            </constraints>
+                                            <state key="normal" title="Button"/>
+                                            <buttonConfiguration key="configuration" style="plain" image="pencil"/>
+                                            <connections>
+                                                <action selector="brushButtonClicked:" destination="-1" eventType="touchDown" id="YUT-hW-rPQ"/>
+                                            </connections>
+                                        </button>
+                                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="pencil-tip" translatesAutoresizingMaskIntoConstraints="NO" id="Wrb-8p-MIr">
+                                            <rect key="frame" x="0.0" y="0.0" width="70" height="58"/>
+                                            <constraints>
+                                                <constraint firstAttribute="height" constant="58" id="ZOs-li-lcP"/>
+                                                <constraint firstAttribute="width" secondItem="Wrb-8p-MIr" secondAttribute="height" multiplier="53:18" constant="-100.7777777777778" id="v6t-Ma-P1o"/>
+                                            </constraints>
                                         </imageView>
                                     </subviews>
                                     <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                     <constraints>
-                                        <constraint firstItem="Wrb-8p-MIr" firstAttribute="top" secondItem="MuG-Ee-15U" secondAttribute="top" id="3Gg-5G-0nd"/>
-                                        <constraint firstAttribute="trailing" secondItem="Wrb-8p-MIr" secondAttribute="trailing" constant="205" id="9t6-pX-N11"/>
-                                        <constraint firstItem="Wrb-8p-MIr" firstAttribute="leading" secondItem="MuG-Ee-15U" secondAttribute="leading" id="FDX-ya-aGe"/>
-                                        <constraint firstAttribute="width" secondItem="MuG-Ee-15U" secondAttribute="height" multiplier="31:65" constant="205" id="axz-Cs-noM"/>
-                                        <constraint firstAttribute="bottom" secondItem="Wrb-8p-MIr" secondAttribute="bottom" id="llw-WJ-uBF"/>
+                                        <constraint firstItem="Wrb-8p-MIr" firstAttribute="top" secondItem="MuG-Ee-15U" secondAttribute="top" id="EAq-Cb-a9Q"/>
+                                        <constraint firstItem="Wrb-8p-MIr" firstAttribute="leading" secondItem="MuG-Ee-15U" secondAttribute="leading" id="Fzj-nE-apC"/>
+                                        <constraint firstItem="TMN-Bp-iqe" firstAttribute="width" secondItem="Wrb-8p-MIr" secondAttribute="width" id="Gd9-nz-3Ld"/>
+                                        <constraint firstItem="TMN-Bp-iqe" firstAttribute="top" secondItem="Wrb-8p-MIr" secondAttribute="bottom" constant="-22" id="RdU-M7-nFd"/>
+                                        <constraint firstItem="TMN-Bp-iqe" firstAttribute="leading" secondItem="MuG-Ee-15U" secondAttribute="leading" id="ent-hq-qmY"/>
+                                        <constraint firstAttribute="width" secondItem="MuG-Ee-15U" secondAttribute="height" multiplier="267:130" id="xZ0-Uq-6gF"/>
                                     </constraints>
                                 </view>
-                                <button opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="249" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TMN-Bp-iqe">
-                                    <rect key="frame" x="0.0" y="41" width="62" height="89"/>
-                                    <constraints>
-                                        <constraint firstAttribute="width" secondItem="TMN-Bp-iqe" secondAttribute="height" multiplier="31:65" constant="19.553846153846152" id="7k4-Ew-9Pb"/>
-                                    </constraints>
-                                    <state key="normal" title="Button"/>
-                                    <buttonConfiguration key="configuration" style="plain" image="brush">
-                                        <preferredSymbolConfiguration key="preferredSymbolConfigurationForImage" scale="default"/>
-                                    </buttonConfiguration>
-                                    <connections>
-                                        <action selector="brushButtonClicked:" destination="-1" eventType="touchDown" id="YUT-hW-rPQ"/>
-                                    </connections>
-                                </button>
                                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Czo-ff-0cc">
                                     <rect key="frame" x="0.0" y="99" width="267" height="31"/>
                                     <subviews>
@@ -207,7 +210,7 @@
                                         <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="3Lt-3w-eRC">
                                             <rect key="frame" x="-2" y="25.5" width="271" height="27.5"/>
                                             <constraints>
-                                                <constraint firstAttribute="width" secondItem="3Lt-3w-eRC" secondAttribute="height" multiplier="10:1" id="nsZ-Qn-nFN"/>
+                                                <constraint firstAttribute="width" secondItem="3Lt-3w-eRC" secondAttribute="height" multiplier="10:1" constant="2" id="nsZ-Qn-nFN"/>
                                             </constraints>
                                         </slider>
                                     </subviews>
@@ -221,23 +224,24 @@
                             </subviews>
                             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             <constraints>
-                                <constraint firstAttribute="bottom" secondItem="TMN-Bp-iqe" secondAttribute="bottom" id="4U8-fh-Tj4"/>
+                                <constraint firstItem="MuG-Ee-15U" firstAttribute="top" secondItem="A6D-qR-Lyy" secondAttribute="top" id="1yE-jY-J5N"/>
                                 <constraint firstAttribute="trailing" secondItem="Zto-3l-VWE" secondAttribute="trailing" id="LFf-Xo-y8D"/>
                                 <constraint firstItem="Zto-3l-VWE" firstAttribute="leading" secondItem="A6D-qR-Lyy" secondAttribute="leading" id="MDx-kp-a5c"/>
                                 <constraint firstItem="MuG-Ee-15U" firstAttribute="top" secondItem="A6D-qR-Lyy" secondAttribute="top" id="Vsd-gX-n1f"/>
                                 <constraint firstItem="Czo-ff-0cc" firstAttribute="top" secondItem="Tei-Aa-AOa" secondAttribute="bottom" constant="-3" id="WW3-ya-euL"/>
                                 <constraint firstItem="MuG-Ee-15U" firstAttribute="leading" secondItem="A6D-qR-Lyy" secondAttribute="leading" id="WdT-kR-MJe"/>
-                                <constraint firstItem="TMN-Bp-iqe" firstAttribute="leading" secondItem="A6D-qR-Lyy" secondAttribute="leading" id="WhA-Cj-xxt"/>
+                                <constraint firstItem="MuG-Ee-15U" firstAttribute="top" secondItem="A6D-qR-Lyy" secondAttribute="top" id="XUZ-G8-OT2"/>
                                 <constraint firstAttribute="trailing" secondItem="Czo-ff-0cc" secondAttribute="trailing" id="XW4-nX-dai"/>
+                                <constraint firstAttribute="bottom" secondItem="MuG-Ee-15U" secondAttribute="bottom" id="YAo-bl-Krg"/>
                                 <constraint firstAttribute="bottom" secondItem="Czo-ff-0cc" secondAttribute="bottom" id="Yel-dr-prJ"/>
                                 <constraint firstItem="Tei-Aa-AOa" firstAttribute="top" secondItem="A6D-qR-Lyy" secondAttribute="top" id="evP-sZ-BX1"/>
+                                <constraint firstAttribute="bottom" secondItem="MuG-Ee-15U" secondAttribute="bottom" id="evn-1J-MZS"/>
                                 <constraint firstItem="Tei-Aa-AOa" firstAttribute="leading" secondItem="A6D-qR-Lyy" secondAttribute="leading" id="jMb-Fm-HP5"/>
                                 <constraint firstItem="Czo-ff-0cc" firstAttribute="top" secondItem="Zto-3l-VWE" secondAttribute="bottom" constant="-3" id="r6a-c8-njU"/>
                                 <constraint firstItem="Zto-3l-VWE" firstAttribute="top" secondItem="A6D-qR-Lyy" secondAttribute="top" id="rkr-oe-gSM"/>
                                 <constraint firstItem="Czo-ff-0cc" firstAttribute="leading" secondItem="A6D-qR-Lyy" secondAttribute="leading" id="tdt-vp-eUv"/>
                                 <constraint firstAttribute="trailing" secondItem="Tei-Aa-AOa" secondAttribute="trailing" id="vnn-R0-cLj"/>
                                 <constraint firstAttribute="bottom" secondItem="MuG-Ee-15U" secondAttribute="bottom" id="yn3-rY-7fr"/>
-                                <constraint firstItem="TMN-Bp-iqe" firstAttribute="top" secondItem="A6D-qR-Lyy" secondAttribute="top" constant="41" id="zQq-3T-Eiw"/>
                             </constraints>
                         </view>
                     </subviews>
@@ -276,10 +280,10 @@
     </objects>
     <resources>
         <image name="arrow.uturn.left" catalog="system" width="128" height="112"/>
-        <image name="brush" width="40" height="176"/>
-        <image name="brush-1" width="40" height="176"/>
         <image name="checkmark" catalog="system" width="128" height="114"/>
         <image name="paintpalette.fill" catalog="system" width="128" height="105"/>
+        <image name="pencil" width="40" height="176"/>
+        <image name="pencil-tip" width="62" height="85"/>
         <image name="textformat.size" catalog="system" width="128" height="80"/>
         <systemColor name="secondarySystemGroupedBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

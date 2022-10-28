@@ -60,7 +60,7 @@ class DrawAndTextView: UIView {
         
         sizeView.isHidden = true
         
-        let image = UIImage(named: "brush-1")?.withRenderingMode(.alwaysTemplate)
+        let image = UIImage(named: "pencil-tip")?.withRenderingMode(.alwaysTemplate)
         imageTip.image = image
         imageTip.tintColor = .black
                 
