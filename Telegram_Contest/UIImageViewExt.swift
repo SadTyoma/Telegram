@@ -32,10 +32,6 @@ class UIImageViewExt: UIImageView {
         let touch = touches.first
         let location = (touch?.location(in: self))!
         
-        if !photoVC.drawingEnabled && photoVC.drawingTool.acceptButton.isEnabled{
-            return
-        }
-        
         guard photoVC.drawingEnabled else {
             if location.x > self.frame.width || location.y > self.frame.height{
                 return
@@ -43,6 +39,7 @@ class UIImageViewExt: UIImageView {
             photoVC.textTouchLocation = location
             photoVC.textField!.isHidden = false
             photoVC.textBackgroundView?.isHidden = false
+            photoVC.verticalSizeSlider?.isHidden = false
             
             return
         }
@@ -56,14 +53,7 @@ class UIImageViewExt: UIImageView {
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard photoVC.drawingEnabled else {
-            let touch = touches.first
-            photoVC.textTouchLocation = touch?.location(in: self)
-//            if let textView = photoVC.textView, let textTouchLocation = photoVC.textTouchLocation {
-//                textView.center = textTouchLocation
-//            }
-            return
-        }
+        guard photoVC.drawingEnabled else {return}
         
         let touch = touches.first
         let p = touch?.location(in: self)

@@ -84,6 +84,8 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
         textField!.delegate = self
         self.view.addSubview(textField!)
         textField!.isHidden = true
+        
+        createVerticalSlider()
     }
     
     override func viewDidLoad() {
@@ -125,6 +127,31 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
         PHPhotoLibrary.shared().unregisterChangeObserver(self)
     }
     
+    func createVerticalSlider(){
+        verticalSizeSlider = UISlider(frame: .zero)
+        guard let slider = verticalSizeSlider else {return}
+        slider.transform = CGAffineTransformMakeRotation(CGFloat(-Double.pi / 2))
+        slider.maximumValue = 80
+        slider.minimumValue = 20
+        slider.value = 36
+        slider.addTarget(self, action: #selector(self.sliderChanged), for: .valueChanged)
+        slider.isContinuous = false
+        slider.isHidden = true
+        
+        let xPos = 0.0
+        let yPos = photoView.frame.height * 0.1
+        let width = photoView.frame.width * 0.1
+        let height = photoView.frame.height * 0.8
+        let sliderFrame = CGRect(x: xPos, y: yPos, width: width, height: height)
+        slider.frame = sliderFrame
+        
+        textBackgroundView?.addSubview(slider)
+    }
+    
+    @objc func sliderChanged(sender: UISlider) {
+        textSize = Double(sender.value)
+    }
+    
     func updateUndoButton() {
         let flag = imageArray.count > 1
         drawingTool.undoButton.isEnabled = flag
@@ -142,6 +169,7 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
         drawImage(textImage, true, text!.frame.origin)
         drawingTool.acceptButton.isEnabled = false
         text.isHidden = true
+        verticalSizeSlider?.isHidden = true
         
         self.photoView.isUserInteractionEnabled = true
         
@@ -221,6 +249,7 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
     public var pinchRecognizer: UIPinchGestureRecognizer?
     public var rotationRecognizer: UIRotationGestureRecognizer?
     public var panRecognizer: UIPanGestureRecognizer?
+    public var verticalSizeSlider: UISlider?
     public var textImage: UIImage?
     public var textBackgroundView: UIView?
     public var fontIndex = 0
