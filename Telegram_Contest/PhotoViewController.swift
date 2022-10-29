@@ -342,7 +342,11 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
     public func drawImage2(_ incrementalImage:UIImage?, _ saveImage: Bool, _ location: CGPoint?){
         if let incrementalImage = incrementalImage, let image = self.photoView.image{
             let scaled = incrementalImage.scale(by: imageScale)
-            let rotated = scaled!.rotate(radians: Float(imageRotation))
+            var rotation = Double.pi - abs(imageRotation)
+            if imageRotation < 0{
+                rotation *= -1
+            }
+            let rotated = scaled!.rotate(radians: Float(rotation))
             
             let size = self.photoView.bounds.size
             UIGraphicsBeginImageContextWithOptions(size, true, 0.0)
