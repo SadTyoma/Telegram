@@ -211,6 +211,9 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
         
         self.photoView.isUserInteractionEnabled = true
         
+        imageScale = 1.0
+        imageRotation = 0.0
+        
         textTouchLocation = nil
         textImage = nil
     }
@@ -343,10 +346,8 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
         if let incrementalImage = incrementalImage, let image = self.photoView.image{
             let scaled = incrementalImage.scale(by: imageScale)
             var rotation = Double.pi - abs(imageRotation)
-            if imageRotation < 0{
-                rotation *= -1
-            }
-            let rotated = scaled!.rotate(radians: Float(rotation))
+            rotation *= -1
+            let rotated = scaled!.rotate(radians: Float(imageRotation))
             
             let size = self.photoView.bounds.size
             UIGraphicsBeginImageContextWithOptions(size, true, 0.0)
