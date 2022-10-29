@@ -16,15 +16,12 @@ class DrawAndTextView: UIView {
     @IBOutlet weak var fontType: UISegmentedControl!
     @IBOutlet weak var textView: UIView!
     @IBOutlet weak var sizeView: UIView!
-    @IBOutlet weak var sizeButton: UIButton!
+    @IBOutlet weak var saveButton: UIButton!
     @IBOutlet weak var sizeBar: UISlider!
     @IBOutlet weak var imageTip: UIImageView!
     
     var sizeViewState = false
-    @IBAction func sizeButtonClicked(_ sender: Any){
-        sizeView.isHidden = sizeViewState
-        sizeViewState = !sizeViewState
-    }
+    @IBAction func saveButtonClicked(_ sender: Any){}
     @IBAction func brushButtonClicked(_ sender: Any){}
     @IBAction func colorButtonClicked(_ sender: Any){}
     @IBAction func undoButtonClicked(_ sender: Any){}

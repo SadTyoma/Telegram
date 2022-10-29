@@ -103,17 +103,17 @@
                                 <rect key="frame" x="302" y="4.5" width="92" height="35"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" image="square.and.arrow.down" catalog="system"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Claer All"/>
                                 <connections>
-                                    <action selector="saveClicked:" destination="13D-0h-Evb" eventType="touchUpInside" id="OYp-5k-YoN"/>
+                                    <action selector="clearAllClicked:" destination="13D-0h-Evb" eventType="touchUpInside" id="hRz-Cr-VC0"/>
                                 </connections>
                             </button>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="clearAllButton" destination="Xev-1U-qyT" id="LWx-bU-WGo"/>
                         <outlet property="drawingTool" destination="3dn-B5-Qqk" id="WOs-h5-mMC"/>
                         <outlet property="photoView" destination="Ekh-LJ-dff" id="ym6-cb-qZf"/>
-                        <outlet property="saveButton" destination="Xev-1U-qyT" id="CiB-J6-qni"/>
                         <outlet property="text" destination="5gY-MR-gIr" id="0Kr-1u-sbW"/>
                     </connections>
                 </viewController>
@@ -174,7 +174,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="square.and.arrow.down" catalog="system" width="121" height="128"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

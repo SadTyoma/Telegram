@@ -17,8 +17,8 @@
                 <outlet property="colorButton" destination="Ujx-8J-xWY" id="Hqs-xm-pT5"/>
                 <outlet property="fontType" destination="XMe-Ol-H0X" id="Dqh-l8-f6y"/>
                 <outlet property="imageTip" destination="Wrb-8p-MIr" id="nEH-fl-uCY"/>
+                <outlet property="saveButton" destination="rAi-8C-ib4" id="VBk-j0-53V"/>
                 <outlet property="sizeBar" destination="3Lt-3w-eRC" id="1mC-yN-mqm"/>
-                <outlet property="sizeButton" destination="rAi-8C-ib4" id="ala-G4-Hk0"/>
                 <outlet property="sizeView" destination="Tei-Aa-AOa" id="hwS-8c-zWe"/>
                 <outlet property="textView" destination="Zto-3l-VWE" id="xt5-im-86t"/>
                 <outlet property="undoButton" destination="2VK-6S-rtW" id="95y-Ip-KQu"/>
@@ -82,7 +82,7 @@
                                     </constraints>
                                     <color key="tintColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                     <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
-                                    <state key="normal" title="Size" image="textformat.size" catalog="system">
+                                    <state key="normal" title="Size" image="arrow.down" catalog="system">
                                         <attributedString key="attributedTitle">
                                             <fragment content=" ">
                                                 <attributes>
@@ -93,9 +93,6 @@
                                             </fragment>
                                         </attributedString>
                                     </state>
-                                    <connections>
-                                        <action selector="sizeButtonClicked:" destination="-1" eventType="touchDown" id="BCh-L6-GO8"/>
-                                    </connections>
                                 </button>
                                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="d24-CL-UZR">
                                     <rect key="frame" x="14" y="85" width="45" height="45"/>
@@ -282,12 +279,12 @@
         </view>
     </objects>
     <resources>
+        <image name="arrow.down" catalog="system" width="118" height="128"/>
         <image name="arrow.uturn.left" catalog="system" width="128" height="113"/>
         <image name="checkmark" catalog="system" width="128" height="114"/>
         <image name="paintpalette.fill" catalog="system" width="128" height="105"/>
         <image name="pencil" width="40" height="176"/>
         <image name="pencil-tip" width="118" height="85"/>
-        <image name="textformat.size" catalog="system" width="128" height="79"/>
         <systemColor name="secondarySystemGroupedBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

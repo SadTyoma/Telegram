@@ -15,7 +15,7 @@ let UPPER = 1.0
 
 class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
     
-    @IBOutlet weak var saveButton: UIBarButtonItem!
+    @IBOutlet weak var clearAllButton: UIBarButtonItem!
     @IBOutlet weak var photoView: UIImageViewExt!
     @IBOutlet weak var drawingTool: DrawAndTextView!
     @IBOutlet weak var text: UIImageView!
@@ -71,6 +71,13 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
         if location.x > photoView.frame.width || location.y > photoView.frame.height{
             return
         }
+        
+        guard !drawingEnabled else{
+            drawingTool.sizeView.isHidden = true
+            
+            return
+        }
+        
         textTouchLocation = location
         textLocation = sender.location(in: self.photoView)
         textField!.isHidden = false
@@ -138,6 +145,7 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
         drawingTool.brushButton.addTarget(self, action: #selector(self.brushButtonClicked), for: .touchUpInside)
         drawingTool.DrawOrText.addTarget(self, action: #selector(self.drawOrTextChanged), for: .valueChanged)
         drawingTool.acceptButton.addTarget(self, action: #selector(self.acceptButtonClicked), for: .touchUpInside)
+        drawingTool.saveButton.addTarget(self, action: #selector(self.saveButtonClicked), for: .touchUpInside)
         
         updateUndoButton()
         drawingTool.acceptButton.isEnabled = false
@@ -179,7 +187,12 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
         drawingTool.undoButton.tintColor = flag ? .darkGray : .lightGray
     }
     
-    @IBAction func saveClicked(_ sender: Any) {
+    @IBAction func clearAllClicked(_ sender: Any) {
+        photoView.image = imageArray.first!
+        photoView.incrementalImage = imageArray.first!
+    }
+    
+    @objc func saveButtonClicked(){
         let image = imageArray.last!
         if let image = image{
             UIImageWriteToSavedPhotosAlbum(image, self, nil, nil)
@@ -219,7 +232,7 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
     }
     
     @objc func brushButtonClicked() {
-        //TODO: change type of painting
+        drawingTool.sizeView.isHidden = false
     }
     
     @objc func fontTypeChanged() {
