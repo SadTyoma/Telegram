@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="im5-oZ-O5s">
+    <device id="retina6_0" orientation="portrait" appearance="light"/>
     <dependencies>
+        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -13,7 +15,7 @@
             <objects>
                 <collectionViewController id="hos-kR-3SB" customClass="PhotosCollectionViewController" customModule="Telegram_Contest" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="I8m-gu-fYp">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="cEo-ug-1fO">
@@ -65,14 +67,14 @@
             <objects>
                 <viewController id="13D-0h-Evb" customClass="PhotoViewController" customModule="Telegram_Contest" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="TrS-h3-lLX">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Ekh-LJ-dff" customClass="UIImageViewForDrawing" customModule="Telegram_Contest" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="44" width="600" height="361"/>
+                                <rect key="frame" x="0.0" y="91" width="390" height="589.33333333333337"/>
                             </imageView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3dn-B5-Qqk" customClass="DrawAndTextView" customModule="Telegram_Contest" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="413" width="600" height="187"/>
+                                <rect key="frame" x="0.0" y="688.33333333333337" width="390" height="121.66666666666663"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                             </view>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5gY-MR-gIr">
@@ -98,10 +100,10 @@
                     <navigationItem key="navigationItem" id="aJb-yM-b3S">
                         <barButtonItem key="rightBarButtonItem" title="Clear All" style="plain" id="Xev-1U-qyT">
                             <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" id="YHc-CN-g7I">
-                                <rect key="frame" x="302" y="4.5" width="92" height="35"/>
+                                <rect key="frame" x="282" y="4.6666666666666679" width="92" height="35"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="Claer All"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Clear All"/>
                                 <connections>
                                     <action selector="clearAllClicked:" destination="13D-0h-Evb" eventType="touchUpInside" id="hRz-Cr-VC0"/>
                                 </connections>
@@ -124,11 +126,11 @@
             <objects>
                 <viewController id="YQB-Fu-tMk" customClass="MainViewController" customModule="Telegram_Contest" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="nwM-hL-IDf">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <rect key="frame" x="0.0" y="0.0" width="390" height="844"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YHt-u1-fzV">
-                                <rect key="frame" x="225" y="304.66666666666669" width="150" height="34.666666666666686"/>
+                                <rect key="frame" x="119.66666666666667" y="433.33333333333331" width="150.66666666666663" height="34.666666666666686"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="YHt-u1-fzV" secondAttribute="height" multiplier="100:23" id="Kxv-Wn-0pJ"/>
                                 </constraints>
@@ -158,7 +160,7 @@
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="im5-oZ-O5s" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="6UI-JW-6n2">
-                        <rect key="frame" x="0.0" y="48" width="414" height="44"/>
+                        <rect key="frame" x="0.0" y="47" width="390" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>

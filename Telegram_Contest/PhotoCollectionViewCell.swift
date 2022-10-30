@@ -47,48 +47,6 @@ extension UIImageView {
             resultHandler: resultHandler)
     }
     
-    func fetchImageAsset(_ asset: PHAsset?, targetSize size: CGSize, contentMode: PHImageContentMode = .aspectFill, options: PHImageRequestOptions? = nil, completionHandler: ((Bool) -> Void)?) {
-        guard let asset = asset else {
-            completionHandler?(false)
-            return
-        }
-        let resultHandler: (UIImage?, [AnyHashable: Any]?) -> Void = { image, info in
-            self.contentMode = .scaleAspectFill
-
-            guard let img = image else{
-                self.image = image
-                completionHandler?(true)
-                return
-            }
-            
-            let viewportAspectRatio = self.bounds.size.width / self.bounds.size.height
-            let imageAspectRatio = img.size.width / img.size.height
-            
-            var coeff = CGFloat(1.0)
-            if viewportAspectRatio > imageAspectRatio { // viewport is wider
-                coeff = self.bounds.size.height / img.size.height
-            } else { // viewport is taller
-                coeff = self.bounds.size.width / img.size.width
-            }
-            let resultSize = CGSize(width: img.size.width * coeff, height: img.size.height * coeff)
-            
-            UIGraphicsBeginImageContextWithOptions(self.bounds.size, true, 0.0)
-            let origin = CGPoint(x: (self.bounds.size.width - resultSize.width) / 2,
-                                y: (self.bounds.size.height - resultSize.height) / 2)
-            img.draw(in: CGRect(origin: origin, size: resultSize))
-            let incImage = UIGraphicsGetImageFromCurrentImageContext()
-            self.image = incImage
-            completionHandler?(true)
-        }
-        PHImageManager.default().requestImage(
-            for: asset,
-            targetSize: PHImageManagerMaximumSize,
-            contentMode: contentMode,
-            options: options,
-            resultHandler: resultHandler)
-        
-    }
-    
     private func cropImage(sourceImage:UIImage)->UIImage{
         let sideLength = min(
             sourceImage.size.width,

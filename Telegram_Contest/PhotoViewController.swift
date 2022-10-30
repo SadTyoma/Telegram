@@ -216,10 +216,36 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
     }
     
     @objc func saveButtonClicked(){
-        let image = imageArray.last!
-        if let image = image{
-            UIImageWriteToSavedPhotosAlbum(image, self, nil, nil)
-        }
+        askSaveType()
+    }
+    
+    private func askSaveType(){
+        let refreshAlert = UIAlertController(title: "Save Type", message: "Save image without borders?", preferredStyle: UIAlertController.Style.alert)
+
+        refreshAlert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction!) in
+            let image = self.getImageWithoutBorders()
+            if let image = image{
+                UIImageWriteToSavedPhotosAlbum(image, self, nil, nil)
+            }
+        }))
+
+        refreshAlert.addAction(UIAlertAction(title: "No", style: .cancel, handler: { (action: UIAlertAction!) in
+            let image = self.imageArray.last!
+            if let image = image{
+                UIImageWriteToSavedPhotosAlbum(image, self, nil, nil)
+            }
+        }))
+
+        present(refreshAlert, animated: true, completion: nil)
+    }
+    
+    private func getImageWithoutBorders()->UIImage?{
+        guard let imageSize = photoView.imageSize, let imageOrigin = photoView.imageOrigin  else {return nil}
+        UIGraphicsBeginImageContextWithOptions(imageSize, true, 0.0)
+        photoView.image!.draw(at: CGPoint(x: -imageOrigin.x, y: -imageOrigin.y))
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        
+        return newImage
     }
     
     @objc func acceptButtonClicked() {
