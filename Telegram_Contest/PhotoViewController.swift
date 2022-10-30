@@ -13,11 +13,12 @@ let FF = 0.2
 let LOWER = 0.01
 let UPPER = 1.0
 
-class PhotoViewController: UIViewController {
+class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
     
-    @IBOutlet weak var saveButton: UIButton!
-    @IBOutlet weak var undoButton: UIButton!
-    @IBOutlet weak var photoView: UIImageView!
+    @IBOutlet weak var clearAllButton: UIBarButtonItem!
+    @IBOutlet weak var photoView: UIImageViewExt!
+    @IBOutlet weak var drawingTool: DrawAndTextView!
+    @IBOutlet weak var text: UIImageView!
     
     var asset: PHAsset
     var editingOutput: PHContentEditingOutput?
@@ -31,21 +32,123 @@ class PhotoViewController: UIViewController {
         super.init(coder: coder)
     }
     
-    @IBAction func ClearAllClicked(_ sender: Any) { getPhoto()}
-    @IBAction func SaveClicked(_ sender: Any) { saveImage()}
-    @IBAction func undoClicked(_ sender: Any) { undo()}
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
+    
+    @objc func didPinch(sender: UIPinchGestureRecognizer) {
+        let scale = sender.scale
+        let imageView = sender.view as! UIImageView
+        imageView.transform = CGAffineTransformScale(imageView.transform, scale, scale)
+    
+        imageScale *= scale
+
+        sender.scale = 1
+    }
+    
+    @objc func didRotate(sender: UIRotationGestureRecognizer) {
+        let rotation = sender.rotation
+        let imageView = sender.view as! UIImageView
+        imageView.transform = CGAffineTransformRotate(imageView.transform, rotation)
+        imageRotation += rotation
+        sender.rotation = 0
+    }
+    
+    @objc func didPanned(sender: UIPanGestureRecognizer) {
+        let translation = sender.translation(in: text)
+        
+        text.frame.origin.x += translation.x
+        text.frame.origin.y += translation.y
+        
+        textLocation?.x += translation.x
+        textLocation?.y += translation.y
+        
+        sender.setTranslation(.zero, in: text)
+    }
+    
+    @objc func didTapped(sender: UITapGestureRecognizer){
+        let location = sender.location(in: self.view)
+        if location.x > photoView.frame.width || location.y > photoView.frame.height{
+            return
+        }
+        
+        guard !drawingEnabled else{
+            drawingTool.sizeView.isHidden = true
+            
+            return
+        }
+        
+        textTouchLocation = location
+        textLocation = sender.location(in: self.photoView)
+        textField!.isHidden = false
+        textBackgroundView?.isHidden = false
+        verticalSizeSlider?.isHidden = false
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        if imageArray.isEmpty{
+            imageArray.append(photoView.image)
+        }
+        
+        textBackgroundView = UIView(frame: photoView.frame)
+        textBackgroundView?.backgroundColor = .darkGray.withAlphaComponent(0.5)
+        self.view.addSubview(textBackgroundView!)
+        textBackgroundView?.isHidden = true
+        
+        textField =  UITextField()
+        let midX = view.bounds.midX
+        let midY = view.bounds.midY
+        let size = CGSize(width: view.bounds.size.width / 2, height: view.bounds.height / 20)
+        textField!.frame = CGRect(x: midX - size.width / 2, y: midY - size.height / 2, width: size.width, height: size.height)
+        textField!.placeholder = "Enter text"
+        textField!.borderStyle = UITextField.BorderStyle.roundedRect
+        textField!.autocorrectionType = UITextAutocorrectionType.no
+        textField!.keyboardType = UIKeyboardType.default
+        textField!.returnKeyType = UIReturnKeyType.done
+        textField!.clearButtonMode = UITextField.ViewMode.whileEditing
+        textField!.contentVerticalAlignment = UIControl.ContentVerticalAlignment.center
+        textField!.delegate = self
+        self.view.addSubview(textField!)
+        textField!.isHidden = true
+        
+        createVerticalSlider()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.photoView.phVC = self
+        self.photoView.isUserInteractionEnabled = true
         getPhoto()
-        self.photoView.isMultipleTouchEnabled = false
-        tap = UITapGestureRecognizer(target: self, action: #selector(eraseDrawing(_:)))
-        tap?.numberOfTapsRequired = 2
-        if let tap = tap{
-            self.photoView.addGestureRecognizer(tap)
-        }
+        
+        pinchRecognizer = UIPinchGestureRecognizer(target: self, action: #selector(didPinch(sender:)))
+        rotationRecognizer = UIRotationGestureRecognizer(target: self, action: #selector(didRotate(sender:)))
+        panRecognizer = UIPanGestureRecognizer(target: self, action: #selector(didPanned(sender:)))
+        tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapped(sender:)))
+        
+        view.isUserInteractionEnabled = true
+        view.isMultipleTouchEnabled = true
+        view.addGestureRecognizer(tapRecognizer!)
+        text.isUserInteractionEnabled = true
+        text.isMultipleTouchEnabled = true
+        text.addGestureRecognizer(pinchRecognizer!)
+        text.addGestureRecognizer(rotationRecognizer!)
+        text.addGestureRecognizer(panRecognizer!)
+        text.frame = CGRect(origin: .zero, size: CGSize(width: 1, height: 1))
+        text.isHidden = true
+        
+        //DrawingTool
+        drawingTool.undoButton.addTarget(self, action: #selector(self.undo), for: .touchUpInside)
+        drawingTool.colorButton.addTarget(self, action: #selector(self.colorButtonClicked), for: .touchUpInside)
+        drawingTool.sizeBar.addTarget(self, action: #selector(self.sizeChanged), for: .valueChanged)
+        drawingTool.fontType.addTarget(self, action: #selector(self.fontTypeChanged), for: .valueChanged)
+        drawingTool.brushButton.addTarget(self, action: #selector(self.brushButtonClicked), for: .touchUpInside)
+        drawingTool.DrawOrText.addTarget(self, action: #selector(self.drawOrTextChanged), for: .valueChanged)
+        drawingTool.acceptButton.addTarget(self, action: #selector(self.acceptButtonClicked), for: .touchUpInside)
+        drawingTool.saveButton.addTarget(self, action: #selector(self.saveButtonClicked), for: .touchUpInside)
         
         updateUndoButton()
+        drawingTool.acceptButton.isEnabled = false
         PHPhotoLibrary.shared().register(self)
     }
     
@@ -53,502 +156,267 @@ class PhotoViewController: UIViewController {
         PHPhotoLibrary.shared().unregisterChangeObserver(self)
     }
     
-    //    func applyFilter() {
-    //      // 1
-    //      asset.requestContentEditingInput(with: nil) { input, _ in
-    //        // 2
-    //        guard let bundleID = Bundle.main.bundleIdentifier else {
-    //          fatalError("Error: unable to get bundle identifier")
-    //        }
-    //        guard let input = input else {
-    //          fatalError("Error: cannot get editing input")
-    //        }
-    //        guard let filterData = Filter.noir.data else {
-    //          fatalError("Error: cannot get filter data")
-    //        }
-    //        // 3
-    //        let adjustmentData = PHAdjustmentData(
-    //          formatIdentifier: bundleID,
-    //          formatVersion: "1.0",
-    //          data: filterData)
-    //        // 4
-    //        self.editingOutput = PHContentEditingOutput(contentEditingInput: input)
-    //        guard let editingOutput = self.editingOutput else { return }
-    //        editingOutput.adjustmentData = adjustmentData
-    //        // 5
-    //        let fitleredImage = self.imageView.image?.applyFilter(.noir)
-    //        self.imageView.image = fitleredImage
-    //        // 6
-    //        let jpegData = fitleredImage?.jpegData(compressionQuality: 1.0)
-    //        do {
-    //          try jpegData?.write(to: editingOutput.renderedContentURL)
-    //        } catch {
-    //          print(error.localizedDescription)
-    //        }
-    //        // 7
-    //        DispatchQueue.main.async {
-    //          self.saveButton.isEnabled = true
-    //        }
-    //      }
-    //    }
+    func createVerticalSlider(){
+        verticalSizeSlider = UISlider(frame: .zero)
+        guard let slider = verticalSizeSlider else {return}
+        slider.transform = CGAffineTransformMakeRotation(CGFloat(-Double.pi / 2))
+        slider.maximumValue = 80
+        slider.minimumValue = 20
+        slider.value = 36
+        slider.addTarget(self, action: #selector(self.sliderChanged), for: .valueChanged)
+        slider.isContinuous = false
+        slider.isHidden = true
+        
+        let xPos = 0.0
+        let yPos = photoView.frame.height * 0.1
+        let width = photoView.frame.width * 0.1
+        let height = photoView.frame.height * 0.8
+        let sliderFrame = CGRect(x: xPos, y: yPos, width: width, height: height)
+        slider.frame = sliderFrame
+        
+        textBackgroundView?.addSubview(slider)
+    }
+    
+    @objc func sliderChanged(sender: UISlider) {
+        textSize = Double(sender.value)
+    }
     
     func updateUndoButton() {
-        let adjustmentResources = PHAssetResource.assetResources(for: asset)
-            .filter { $0.type == .adjustmentData }
-        undoButton.isEnabled = !adjustmentResources.isEmpty
+        let flag = imageArray.count > 1
+        drawingTool.undoButton.isEnabled = flag
+        drawingTool.undoButton.tintColor = flag ? .darkGray : .lightGray
     }
     
-    func saveImage() {
-        // 1
-        let changeRequest: () -> Void = {
-            let changeRequest = PHAssetChangeRequest(for: self.asset)
-            changeRequest.contentEditingOutput = self.editingOutput
-        }
-        // 2
-        let completionHandler: (Bool, Error?) -> Void = { success, error in
-            guard success else {
-                print("Error: cannot edit asset: \(String(describing: error))")
-                return
-            }
-            // 3
-            self.editingOutput = nil
-            DispatchQueue.main.async {
-                self.saveButton.isEnabled = false
-            }
-        }
-        // 4
-        PHPhotoLibrary.shared().performChanges(
-            changeRequest,
-            completionHandler: completionHandler)
+    @IBAction func clearAllClicked(_ sender: Any) {
+        photoView.image = imageArray.first!
+        photoView.incrementalImage = imageArray.first!
     }
     
-    func undo() {
-        // 1
-        let changeRequest: () -> Void = {
-            let request = PHAssetChangeRequest(for: self.asset)
-            request.revertAssetContentToOriginal()
+    @objc func saveButtonClicked(){
+        let image = imageArray.last!
+        if let image = image{
+            UIImageWriteToSavedPhotosAlbum(image, self, nil, nil)
         }
-        // 2
-        let completionHandler: (Bool, Error?) -> Void = { success, error in
-            guard success else {
-                print("Error: can't revert the asset: \(String(describing: error))")
-                return
+    }
+    
+    @objc func acceptButtonClicked() {
+        let location = CGPoint(x: textLocation!.x - text!.frame.width / 2, y: textLocation!.y - text!.frame.height / 2)
+        drawImage2(textImage, true, location)
+        drawingTool.acceptButton.isEnabled = false
+        text.isHidden = true
+        text.frame = CGRect(origin: .zero, size: CGSize(width: 1, height: 1))
+        text.transform = CGAffineTransformIdentity
+        
+        verticalSizeSlider?.isHidden = true
+        
+        self.photoView.isUserInteractionEnabled = true
+        
+        imageScale = 1.0
+        imageRotation = 0.0
+        
+        textTouchLocation = nil
+        textImage = nil
+    }
+    
+    @objc func drawOrTextChanged() {
+        switch drawingTool.DrawOrText.selectedSegmentIndex
+        {
+        case 0:
+            drawingEnabled = true
+            if !textField!.isHidden{
+                textField!.isHidden = true
+                textBackgroundView?.isHidden = true
             }
-            DispatchQueue.main.async {
-                self.undoButton.isEnabled = false
-            }
+        case 1:
+            drawingEnabled = false
+        default:
+            break
         }
-        // 3
-        PHPhotoLibrary.shared().performChanges(
-            changeRequest,
-            completionHandler: completionHandler)
+    }
+    
+    @objc func brushButtonClicked() {
+        drawingTool.sizeView.isHidden = false
+    }
+    
+    @objc func fontTypeChanged() {
+        fontIndex = drawingTool.fontType.selectedSegmentIndex
+    }
+    
+    @objc func sizeChanged() {
+        textSize = Double(drawingTool.sizeBar.value)
+    }
+    
+    @objc func colorButtonClicked() {
+        let colorVC = UIColorPickerViewController()
+        colorVC.delegate = self
+        present(colorVC, animated: true)
+    }
+    
+    @objc func undo() {
+        if imageArray.count > 1{
+            imageArray.removeLast()
+            updateUndoButton()
+            photoView.image = imageArray.last!
+            photoView.incrementalImage = imageArray.last!
+        }
     }
     
     func getPhoto() {
         photoView.fetchImageAsset(asset, targetSize: photoView.bounds.size, completionHandler: nil)
     }
     
-    struct LineSegment{
-        var firstPoint: CGPoint
-        var secondPoint: CGPoint
+    func createTextImage(text: String)->UIImage?{
+        let attributes = [
+            NSAttributedString.Key.foregroundColor : currentColor,
+            NSAttributedString.Key.font : UIFont(name: fontTypes[fontIndex], size: textSize)!,
+        ]
+        
+        let waterfallText = NSAttributedString(string: text, attributes: attributes)
+        let textGenerationFilter = CIFilter(name: "CIAttributedTextImageGenerator")!
+        textGenerationFilter.setValue(waterfallText, forKey: "inputText")
+        textGenerationFilter.setValue(NSNumber(value: Double(1)), forKey: "inputScaleFactor")
+        guard  let outputImage = textGenerationFilter.outputImage else { return nil }
+        
+        return UIImage(ciImage: outputImage)
     }
     
-    private var incrementalImage: UIImage?
-    private var lastImage: UIImage?
-    private var pts = [CGPoint](repeating: CGPoint.zero, count: 5)
-    private var ctr = 0
-    private var pointsBuffer = [CGPoint](repeating: CGPoint.zero, count: CAPACITY)
-    private var bufIdx = 0
-    private var drawingQueue = DispatchQueue(label: "com.artyomshuneyko.drawing")
-    private var isFirstTouchPoint = false
-    private var lastSegmentOfPrev: LineSegment?
-    private var tap: UITapGestureRecognizer?
-    private var fullPath = UIBezierPath() //TODO remove
-    private var points = [CGPoint]()
+    public var drawingEnabled = true
+    public var textTouchLocation: CGPoint?
+    public var textLocation: CGPoint?
+    public var textField : UITextField?
+    public var textFromTextField = ""
+    
+    public var currentColor: UIColor = .black
+    public let fontTypes = ["Arial-BoldMT", "HoeflerText-Italic", "Marker Felt"]
+    public var pinchRecognizer: UIPinchGestureRecognizer?
+    public var rotationRecognizer: UIRotationGestureRecognizer?
+    public var panRecognizer: UIPanGestureRecognizer?
+    public var tapRecognizer: UITapGestureRecognizer?
+    public var verticalSizeSlider: UISlider?
+    public var textImage: UIImage?
+    public var textBackgroundView: UIView?
+    public var imageRotation = 0.0
+    public var imageScale = 1.0
+    public var fontIndex = 0
+    public var textSize = 36.0
+    public var prelineSize: Double{
+        get{
+            return textSize / 8
+        }
+    }
+    public var lineSize: Double{
+        get{
+            return textSize / 12
+        }
+    }
+    public var imageArray = [UIImage?]()
     
     @objc func eraseDrawing(_ sender: UITapGestureRecognizer? = nil){
-        incrementalImage = nil
         self.photoView.setNeedsDisplay()
     }
     
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        ctr = 0
-        bufIdx = 0
-        let touch = touches.first
-        pts[0] = (touch?.location(in: self.photoView))!
-        isFirstTouchPoint = true
-        lastImage = photoView.image
-        fullPath = UIBezierPath()
+    public func addToImageArray(_ image:UIImage?){
+        imageArray.append(image)
+        updateUndoButton()
     }
     
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        let touch = touches.first
-        let p = touch?.location(in: self.photoView)
-        points.append(p!)
-        ctr += 1
-        pts[ctr] = p!
-        if ctr == 4 {
-            pts[3] = CGPoint(x: (pts[2].x + pts[4].x) / 2.0, y: (pts[2].y + pts[4].y) / 2.0)
-
-            for i in 0..<4 {
-                pointsBuffer[bufIdx + i] = pts[i]
-            }
-
-            bufIdx += 4
-
-            let bounds = self.photoView.bounds
-
-            drawingQueue.async(execute: { [self] in
-                let offsetPath = UIBezierPath() // ................. (2)
-                if bufIdx == 0 {
-                    return
-                }
-
-                var ls = [LineSegment](repeating: LineSegment(firstPoint: CGPoint.zero, secondPoint: CGPoint.zero), count: 4)
-                var i = 0
-                while i < bufIdx {
-                    if isFirstTouchPoint {
-                        ls[0] = LineSegment(firstPoint: pointsBuffer[0], secondPoint: pointsBuffer[0])
-                        offsetPath.move(to: ls[0].firstPoint)
-                        fullPath.move(to: ls[0].firstPoint)
-                        isFirstTouchPoint = false
-                    } else {
-                        if let lastSegmentOfPrev = lastSegmentOfPrev {
-                            ls[0] = lastSegmentOfPrev
-                        }
-                    }
-
-                    let frac1: Double = FF / clamp(len_sq(pointsBuffer[i], pointsBuffer[i + 1]), LOWER, UPPER) // ................. (4)
-                    let frac2: Double = FF / clamp(len_sq(pointsBuffer[i + 1], pointsBuffer[i + 2]), LOWER, UPPER)
-                    let frac3: Double = FF / clamp(len_sq(pointsBuffer[i + 2], pointsBuffer[i + 3]), LOWER, UPPER)
-                    ls[1] = lineSegmentPerpendicular(to: LineSegment(firstPoint: pointsBuffer[i], secondPoint: pointsBuffer[i + 1]), ofRelativeLength: frac1) // ................. (5)
-                    ls[2] = lineSegmentPerpendicular(to: LineSegment(firstPoint: pointsBuffer[i + 1], secondPoint: pointsBuffer[i + 2]), ofRelativeLength: frac2)
-                    ls[3] = lineSegmentPerpendicular(to: LineSegment(firstPoint: pointsBuffer[i + 2], secondPoint: pointsBuffer[i + 3]), ofRelativeLength: frac3)
-
-                    offsetPath.move(to: ls[0].firstPoint)
-                    fullPath.move(to: ls[0].firstPoint)
-                    
-                    offsetPath.addCurve(to: ls[3].firstPoint, controlPoint1: ls[1].firstPoint, controlPoint2: ls[2].firstPoint)
-                    fullPath.addCurve(to: ls[3].firstPoint, controlPoint1: ls[1].firstPoint, controlPoint2: ls[2].firstPoint)
-                    
-                    offsetPath.addLine(to: ls[3].secondPoint)
-                    fullPath.addLine(to: ls[3].secondPoint)
-                    
-                    offsetPath.addCurve(to: ls[0].secondPoint, controlPoint1: ls[2].secondPoint, controlPoint2: ls[1].secondPoint)
-                    fullPath.addCurve(to: ls[0].secondPoint, controlPoint1: ls[2].secondPoint, controlPoint2: ls[1].secondPoint)
-                    
-                    offsetPath.close()
-                    
-                    lastSegmentOfPrev = ls[3]
-                    i += 4
-                }
-                UIGraphicsBeginImageContextWithOptions(bounds.size, true, 0.0)
-                if incrementalImage == nil{
-                    lastImage!.draw(in: CGRect(origin: .zero, size: bounds.size))
-                }
-                if let incrementalImage = incrementalImage {
-                    incrementalImage.draw(at: .zero)
-                    UIColor.black.setStroke()
-                    UIColor.black.setFill()
-                    offsetPath.stroke() // ................. (8)
-                    offsetPath.fill()
-                }
-                
-                self.incrementalImage = UIGraphicsGetImageFromCurrentImageContext()
-                UIGraphicsEndImageContext()
-                offsetPath.removeAllPoints()
-                DispatchQueue.main.async(execute: { [self] in
-                    drawImage()
-                    bufIdx = 0
-                    self.photoView.setNeedsDisplay()
-                })
-            })
-            pts[0] = pts[3]
-            pts[1] = pts[4]
-            ctr = 1
-        }
-    }
-    
-    func drawRect(rect: CGRect){
-        incrementalImage?.draw(in: rect)
-    }
-    
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        fullPath.close()
-        
-        var newImage: UIImage?
-        let classificationResult = classify()
-        switch classificationResult.type{
-        case .rectangle:
-            newImage = drawRectangle(classificationResult)
-        case .circle:
-            newImage = drawCircle(classificationResult)
-        default:
-            newImage = drawUnknown()
-            self.photoView.image = newImage
-            incrementalImage = newImage
-            points = [CGPoint]()
-            fullPath.removeAllPoints()
-            self.photoView.setNeedsDisplay()
-            
-            return
-        }
-        
-        UIView.transition(with: photoView,
-                          duration: 0.5,
-                          options: .transitionCrossDissolve,
-                          animations: { self.photoView.image = newImage },
-                          completion: nil)
-        
-        incrementalImage = newImage
-        points = [CGPoint]()
-        fullPath.removeAllPoints()
-        self.photoView.setNeedsDisplay()
-    }
-    
-    private func drawUnknown()->UIImage?{
-        let bounds = self.photoView.bounds
-        guard let image = lastImage else {return nil}
-        UIGraphicsBeginImageContextWithOptions(bounds.size, true, 0.0)
-        image.draw(in: CGRect(origin: .zero, size: bounds.size))
-        var incImage = UIGraphicsGetImageFromCurrentImageContext()
-        
-        incImage!.draw(at: .zero)
-        UIColor.black.setStroke()
-        UIColor.black.setFill()
-        fullPath.stroke()
-        fullPath.fill()
-        incImage = UIGraphicsGetImageFromCurrentImageContext()
-        
-        image.draw(in: CGRect(origin: .zero, size: bounds.size))
-        incImage!.draw(in: CGRect(origin: .zero, size: bounds.size))
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        
-        return newImage
-    }
-    
-    func drawRectangle(_ clResult: ClassificationResult) -> UIImage? {
-        guard let image = lastImage else {return nil}
-        let bounds = self.photoView.bounds
-
-        UIGraphicsBeginImageContextWithOptions(bounds.size, true, 0.0)
-        image.draw(in: CGRect(origin: .zero, size: bounds.size))
-        var incImage = UIGraphicsGetImageFromCurrentImageContext()
-        incImage!.draw(at: .zero)
-
-        let rectangle = CGRect(x: clResult.x, y: clResult.y, width: clResult.width, height: clResult.height)
-
-        UIColor.black.setFill()
-        UIRectFrame(rectangle)
-
-        incImage = UIGraphicsGetImageFromCurrentImageContext()
-
-        image.draw(in: CGRect(origin: .zero, size: bounds.size))
-        incImage!.draw(in: CGRect(origin: .zero, size: bounds.size))
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return newImage
-    }
-    
-    func drawCircle(_ clResult: ClassificationResult) -> UIImage? {
-        let center = CGPoint(x: clResult.x + clResult.width / 2, y: clResult.y + clResult.height / 2)
-        let path = UIBezierPath()
-        path.addArc(withCenter: center, radius: clResult.height / 2, startAngle: 0.0, endAngle: Double.pi * 2.0, clockwise: true)
-        
-        let bounds = self.photoView.bounds
-        guard let image = lastImage else {return nil}
-        UIGraphicsBeginImageContextWithOptions(bounds.size, true, 0.0)
-        image.draw(in: CGRect(origin: .zero, size: bounds.size))
-        var incImage = UIGraphicsGetImageFromCurrentImageContext()
-
-        incImage!.draw(at: .zero)
-        UIColor.black.setStroke()
-        UIColor.clear.setFill()
-        path.stroke()
-        path.fill()
-        incImage = UIGraphicsGetImageFromCurrentImageContext()
-
-        image.draw(in: CGRect(origin: .zero, size: bounds.size))
-        incImage!.draw(in: CGRect(origin: .zero, size: bounds.size))
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        
-        return newImage
-    }
-    
-    private func drawImage(){
+    public func drawImage(_ incrementalImage:UIImage?, _ saveImage: Bool, _ location: CGPoint?){
         if let incrementalImage = incrementalImage, let image = self.photoView.image{
             let size = self.photoView.bounds.size
             UIGraphicsBeginImageContextWithOptions(size, true, 0.0)
             image.draw(in: CGRect(origin: .zero, size: size))
-            incrementalImage.draw(in: CGRect(origin: .zero, size: size))
+            
+            if let location = location {
+                let size = incrementalImage.size
+                incrementalImage.draw(in: CGRect(origin: location, size: size))
+            }else{
+                incrementalImage.draw(in: CGRect(origin: .zero, size: size))
+            }
+            
             let newImage = UIGraphicsGetImageFromCurrentImageContext()
             UIGraphicsEndImageContext()
             self.photoView.image = newImage
+            if saveImage{
+                addToImageArray(newImage)
+            }
         }
     }
     
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        self.touchesEnded(touches, with: event)
-    }
-    
-    private func classify()->ClassificationResult{
-        var left = self.photoView.bounds.width
-        var top = self.photoView.bounds.height
-        var right = 0.0
-        var bottom = 0.0
-
-        for point in points {
-            if left > point.x{
-                left = point.x
-            }
-            if right < point.x{
-                right = point.x
-            }
-            if top > point.y{
-                top = point.y
-            }
-            if bottom < point.y{
-                bottom = point.y
-            }
-        }
-        
-        let center = CGPoint(x: (left+right)/2, y: (top+bottom)/2)
-        var sects = [Sector](repeating: Sector(x: 0, y: 0, c: 0), count: 9)
-        let x3 = (right + (1/(right-left)) - left) / 3
-        let y3 = (bottom + (1/(bottom-top)) - top) / 3
-        for point in points {
-            let sx = floor((point.x - left)/x3)
-            let sy = floor((point.y - top)/y3)
-            let idx = Int(sy * 3 + sx)
-            sects[idx].x += point.x
-            sects[idx].y += point.y
-            sects[idx].c += 1
-            if sx == 1 && sy == 1 {
-                return ClassificationResult(type: .unknown, x: 0, y: 0, height: 0, width: 0)
-            }
-        }
-        var sigPts = [Sector]()
-        let clk = [0, 1, 2, 5, 8, 7, 6, 3]
-        for cl in clk{
-            let pt = sects[cl];
-            if(pt.c > 0) {
-                sigPts.append(Sector(x: pt.x / CGFloat(pt.c), y: pt.y / CGFloat(pt.c), c: 0))
-            } else {
-                return ClassificationResult(type: .unknown, x: 0, y: 0, height: 0, width: 0)
-            }
-        }
-        var angles = [Double]()
-        var i = 0
-        while i < sigPts.count{
-            let a = sigPts[i]
-            let b = sigPts[(i + 1) % sigPts.count]
-            let c = sigPts[(i + 2) % sigPts.count]
-            let ab = sqrt(pow(b.x-a.x, 2)+pow(b.y-a.y, 2))
-            let bc = sqrt(pow(b.x-c.x, 2)+pow(b.y-c.y, 2))
-            let ac = sqrt(pow(c.x-a.x, 2)+pow(c.y-a.y, 2))
-            let deg = floor(acos((pow(bc, 2) + pow(ab, 2) - pow(ac, 2))/(2*bc*ab)) * 180 / Double.pi)
+    public func drawImage2(_ incrementalImage:UIImage?, _ saveImage: Bool, _ location: CGPoint?){
+        if let incrementalImage = incrementalImage, let image = self.photoView.image{
+            let scaled = incrementalImage.scale(by: imageScale)
+            var rotation = Double.pi - abs(imageRotation)
+            rotation *= -1
+            let rotated = scaled!.rotate(radians: Float(imageRotation))
             
-            angles.append(deg)
-            i += 1
-        }
-        
-        let corners = getCorners(angles: angles, pts: sigPts)
-        if corners.count <= 1 {
-            return ClassificationResult(type: .circle, x: left, y: top, height: bottom - top, width: right - left)
-        }else if corners.count == 3{
-            return ClassificationResult(type: .triangle, x: left, y: top, height: bottom - top, width: right - left)
-        }else if corners.count == 4 {
-            return ClassificationResult(type: .rectangle, x: left, y: top, height: bottom - top, width: right - left)
-        } else {
-            return ClassificationResult(type: .unknown, x: 0, y: 0, height: 0, width: 0)
-        }
-    }
-    
-    private func getCorners(angles: [Double], pts: [Sector])->[Sector]{
-        var list = [Sector]()
-        if pts.isEmpty{
-            list = points.map { p in
-                Sector(point: p, c: 0)
+            let size = self.photoView.bounds.size
+            UIGraphicsBeginImageContextWithOptions(size, true, 0.0)
+            image.draw(in: CGRect(origin: .zero, size: size))
+            
+            if let location = location {
+                let size = rotated!.size
+                rotated!.draw(in: CGRect(origin: location, size: size))
+            }else{
+                rotated!.draw(in: CGRect(origin: .zero, size: size))
             }
-        }else{
-            list = pts
-        }
-        
-        var corners = [Sector]()
-        var i = 0
-        while i < angles.count{
-            if angles[i] < 125{
-                corners.append(list[(i + 1) % list.count])
+            
+            let newImage = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            self.photoView.image = newImage
+            if saveImage{
+                addToImageArray(newImage)
             }
-            i += 1
         }
-        return corners
-    }
-    
-    private func lineSegmentPerpendicular(to pp: LineSegment, ofRelativeLength fraction: Double) -> LineSegment {
-        let x0 = pp.firstPoint.x
-        let y0 = pp.firstPoint.y
-        let x1 = pp.secondPoint.x
-        let y1 = pp.secondPoint.y
-
-        var dx: CGFloat
-        var dy: CGFloat
-        dx = x1 - x0
-        dy = y1 - y0
-
-        var xa: CGFloat
-        var ya: CGFloat
-        var xb: CGFloat
-        var yb: CGFloat
-        xa = x1 + CGFloat(fraction / 2) * dy
-        ya = y1 - CGFloat(fraction / 2) * dx
-        xb = x1 - CGFloat(fraction / 2) * dy
-        yb = y1 + CGFloat(fraction / 2) * dx
-
-        return LineSegment(firstPoint: CGPoint(x: xa, y: ya), secondPoint: CGPoint(x: xb, y: yb))
-
-    }
-    
-    private func len_sq(_ p1: CGPoint,_ p2: CGPoint)->Double{
-        let dx = p2.x - p1.x
-        let dy = p2.y - p1.y
-        
-        return dx * dx + dy * dy
-    }
-    
-    private func clamp(_ value: Double,_ lower: Double,_ higher: Double)->Double{
-        if value < lower{
-            return lower
-        }
-        if value > higher{
-            return higher
-        }
-        return value
     }
 }
 
 extension PhotoViewController: PHPhotoLibraryChangeObserver {
     func photoLibraryDidChange(_ changeInstance: PHChange) {
-        // 2
-        guard
-            let change = changeInstance.changeDetails(for: asset),
-            let updatedAsset = change.objectAfterChanges
-        else { return }
-        // 3
         DispatchQueue.main.sync {
-            // 4
-            asset = updatedAsset
-            photoView.fetchImageAsset(
-                asset,
-                targetSize: view.bounds.size
-            ) { [weak self] _ in
-                guard let self = self else { return }
-                // 5
-                self.updateUndoButton()
-            }
+            let lastImage = imageArray.last!
+            imageArray.removeAll()
+            imageArray.append(lastImage)
+            
+            updateUndoButton()
         }
+    }
+}
+
+extension PhotoViewController: UITextFieldDelegate{
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        textFromTextField = ""
+        textField.text = textFromTextField
+    }
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textFromTextField = textField.text!
+        textField.isHidden = true
+        textBackgroundView?.isHidden = true
+        self.view.endEditing(true)
+                
+        textImage = createTextImage(text: textFromTextField)
+        let textView = UIImageView(image: textImage)
+        if let textTouchLocation = textTouchLocation {
+            text.frame = textView.frame
+            text.image = textImage
+            text.center = textTouchLocation
+            text.isHidden = false
+        }
+        
+        self.photoView.isUserInteractionEnabled = false
+        
+        drawingTool.acceptButton.isEnabled = true
+        textFromTextField = ""
+        textField.text = textFromTextField
+        
+        return true
+    }
+}
+
+extension PhotoViewController: UIColorPickerViewControllerDelegate{
+    func colorPickerViewControllerDidFinish(_ viewController: UIColorPickerViewController) {
+        let color = viewController.selectedColor
+        currentColor = color
+        drawingTool.imageTip.tintColor = color
     }
 }
 
@@ -583,4 +451,62 @@ enum ShapeType{
     case circle
     case triangle
     case unknown
+}
+
+struct LineSegment{
+    var firstPoint: CGPoint
+    var secondPoint: CGPoint
+}
+
+extension UIImage {
+    func rotate(radians: Float) -> UIImage? {
+        var newSize = CGRect(origin: CGPoint.zero, size: self.size).applying(CGAffineTransform(rotationAngle: CGFloat(radians))).size
+        // Trim off the extremely small float value to prevent core graphics from rounding it up
+        newSize.width = floor(newSize.width)
+        newSize.height = floor(newSize.height)
+
+        UIGraphicsBeginImageContextWithOptions(newSize, false, self.scale)
+        let context = UIGraphicsGetCurrentContext()!
+
+        // Move origin to middle
+        context.translateBy(x: newSize.width/2, y: newSize.height/2)
+        // Rotate around middle
+        context.rotate(by: CGFloat(radians))
+        // Draw the image at its center
+        self.draw(in: CGRect(x: -self.size.width/2, y: -self.size.height/2, width: self.size.width, height: self.size.height))
+
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+
+        return newImage
+    }
+    
+    func resize(targetSize: CGSize) -> UIImage {
+        let size = self.size
+            
+            let widthRatio  = targetSize.width  / size.width
+            let heightRatio = targetSize.height / size.height
+            
+            var newSize: CGSize
+            if widthRatio > heightRatio {
+                newSize = CGSize(width: size.width * heightRatio, height: size.height * heightRatio)
+            } else {
+                newSize = CGSize(width: size.width * widthRatio,  height: size.height * widthRatio)
+            }
+            
+            let rect = CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height)
+            
+            UIGraphicsBeginImageContextWithOptions(newSize, false, 0)
+            self.draw(in: rect)
+            let newImage = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            
+            return newImage!
+        }
+    
+    func scale(by scale: CGFloat) -> UIImage? {
+            let size = self.size
+            let scaledSize = CGSize(width: size.width * scale, height: size.height * scale)
+        return self.resize(targetSize: scaledSize)
+        }
 }

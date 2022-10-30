@@ -54,7 +54,17 @@ extension UIImageView {
         }
         let resultHandler: (UIImage?, [AnyHashable: Any]?) -> Void = { image, info in
             self.contentMode = .scaleAspectFill
-            self.image = image
+
+            guard let img = image else{
+                self.image = image
+                completionHandler?(true)
+                return
+            }
+            //TODO: try to remove this
+            UIGraphicsBeginImageContextWithOptions(self.bounds.size, true, 0.0)
+            img.draw(in: CGRect(origin: .zero, size: self.bounds.size))
+            let incImage = UIGraphicsGetImageFromCurrentImageContext()
+            self.image = incImage
             completionHandler?(true)
         }
         PHImageManager.default().requestImage(

@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="im5-oZ-O5s">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21225" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="im5-oZ-O5s">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21207"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="collection view cell content view" minToolsVersion="11.0"/>
@@ -69,54 +70,56 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ekh-LJ-dff">
-                                <rect key="frame" x="0.0" y="88" width="414" height="684"/>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Ekh-LJ-dff" customClass="UIImageViewExt" customModule="Telegram_Contest" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="92" width="414" height="633"/>
+                            </imageView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3dn-B5-Qqk" customClass="DrawAndTextView" customModule="Telegram_Contest" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="733" width="414" height="129"/>
+                                <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            </view>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5gY-MR-gIr">
+                                <rect key="frame" x="87" y="342" width="240" height="128"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </imageView>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RVu-u2-Eh3">
-                                <rect key="frame" x="340" y="831" width="43" height="31"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" image="arrow.down" catalog="system"/>
-                                <connections>
-                                    <action selector="SaveClicked:" destination="13D-0h-Evb" eventType="touchUpInside" id="UYB-hs-v0J"/>
-                                </connections>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ql9-U4-HOP">
-                                <rect key="frame" x="11" y="832" width="46" height="31"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" image="arrow.uturn.backward" catalog="system"/>
-                                <connections>
-                                    <action selector="undoClicked:" destination="13D-0h-Evb" eventType="touchUpInside" id="89d-sF-DtR"/>
-                                </connections>
-                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="q1Q-lw-tvs"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="Ekh-LJ-dff" firstAttribute="centerX" secondItem="3dn-B5-Qqk" secondAttribute="centerX" id="BUV-uP-qfS"/>
+                            <constraint firstItem="3dn-B5-Qqk" firstAttribute="leading" secondItem="q1Q-lw-tvs" secondAttribute="leading" id="CAa-N1-Fae"/>
+                            <constraint firstItem="Ekh-LJ-dff" firstAttribute="width" secondItem="3dn-B5-Qqk" secondAttribute="height" multiplier="138:43" id="Tc9-iV-eaV"/>
+                            <constraint firstItem="3dn-B5-Qqk" firstAttribute="top" secondItem="Ekh-LJ-dff" secondAttribute="bottom" constant="8" symbolic="YES" id="YQf-VA-kS8"/>
+                            <constraint firstItem="Ekh-LJ-dff" firstAttribute="leading" secondItem="q1Q-lw-tvs" secondAttribute="leading" id="ZUs-jY-pdr"/>
+                            <constraint firstItem="Ekh-LJ-dff" firstAttribute="width" secondItem="3dn-B5-Qqk" secondAttribute="width" id="dbm-D1-Gj4"/>
+                            <constraint firstItem="3dn-B5-Qqk" firstAttribute="trailing" secondItem="q1Q-lw-tvs" secondAttribute="trailing" id="kBu-Hg-1DN"/>
+                            <constraint firstItem="Ekh-LJ-dff" firstAttribute="trailing" secondItem="q1Q-lw-tvs" secondAttribute="trailing" id="nCo-ch-YtI"/>
+                            <constraint firstItem="3dn-B5-Qqk" firstAttribute="bottom" secondItem="q1Q-lw-tvs" secondAttribute="bottom" id="xUi-1D-27V"/>
+                            <constraint firstItem="Ekh-LJ-dff" firstAttribute="top" secondItem="q1Q-lw-tvs" secondAttribute="top" id="yfO-fp-zp5"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="aJb-yM-b3S">
                         <barButtonItem key="rightBarButtonItem" title="Clear All" style="plain" id="Xev-1U-qyT">
                             <button key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" id="YHc-CN-g7I">
-                                <rect key="frame" x="302" y="5" width="92" height="34.5"/>
+                                <rect key="frame" x="302" y="4.5" width="92" height="35"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="plain" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Claer All"/>
+                                <connections>
+                                    <action selector="clearAllClicked:" destination="13D-0h-Evb" eventType="touchUpInside" id="hRz-Cr-VC0"/>
+                                </connections>
                             </button>
-                            <connections>
-                                <action selector="ClearAllClicked:" destination="13D-0h-Evb" id="aLT-2i-4eU"/>
-                            </connections>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="clearAllButton" destination="Xev-1U-qyT" id="LWx-bU-WGo"/>
+                        <outlet property="drawingTool" destination="3dn-B5-Qqk" id="WOs-h5-mMC"/>
                         <outlet property="photoView" destination="Ekh-LJ-dff" id="ym6-cb-qZf"/>
-                        <outlet property="saveButton" destination="RVu-u2-Eh3" id="UGl-IR-cUu"/>
-                        <outlet property="undoButton" destination="Ql9-U4-HOP" id="QQX-Pf-fo2"/>
+                        <outlet property="text" destination="5gY-MR-gIr" id="0Kr-1u-sbW"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="3zK-Eh-68H" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2812" y="153"/>
+            <point key="canvasLocation" x="2811.594202898551" y="152.67857142857142"/>
         </scene>
         <!--Main View Controller-->
         <scene sceneID="Ayr-Gk-x2e">
@@ -126,9 +129,11 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YHt-u1-fzV">
-                                <rect key="frame" x="115" y="433" width="184" height="31"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YHt-u1-fzV">
+                                <rect key="frame" x="132" y="460" width="150" height="34.5"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="YHt-u1-fzV" secondAttribute="height" multiplier="100:23" id="Kxv-Wn-0pJ"/>
+                                </constraints>
                                 <state key="normal" title="Button"/>
                                 <buttonConfiguration key="configuration" style="filled" title="Start"/>
                                 <connections>
@@ -138,6 +143,10 @@
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="yn8-tY-4up"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                        <constraints>
+                            <constraint firstItem="YHt-u1-fzV" firstAttribute="centerY" secondItem="yn8-tY-4up" secondAttribute="centerY" id="GFF-A6-OE8"/>
+                            <constraint firstItem="YHt-u1-fzV" firstAttribute="centerX" secondItem="yn8-tY-4up" secondAttribute="centerX" id="QlC-Pb-w0F"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="s8o-KY-Ong"/>
                 </viewController>
@@ -151,7 +160,7 @@
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="im5-oZ-O5s" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="6UI-JW-6n2">
-                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
+                        <rect key="frame" x="0.0" y="48" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
@@ -165,8 +174,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="arrow.down" catalog="system" width="120" height="128"/>
-        <image name="arrow.uturn.backward" catalog="system" width="128" height="112"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>
