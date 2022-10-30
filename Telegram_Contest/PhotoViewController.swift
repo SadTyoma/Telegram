@@ -71,9 +71,17 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
     
     @objc func didPanned(sender: UIPanGestureRecognizer) {
         let translation = sender.translation(in: text)
+        let location = sender.location(in: self.view)
         
         text.frame.origin.x += translation.x
         text.frame.origin.y += translation.y
+        
+        if text.frame.origin.x < 0.0 || text.frame.origin.x + text.frame.width > photoView.frame.width || text.frame.origin.y + text.frame.height > photoView.frame.height + photoView.frame.origin.y || text.frame.origin.y < photoView.frame.origin.y{
+            text.frame.origin.x -= translation.x
+            text.frame.origin.y -= translation.y
+            
+            return
+        }
         
         textLocation?.x += translation.x
         textLocation?.y += translation.y
