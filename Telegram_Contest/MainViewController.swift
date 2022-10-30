@@ -19,6 +19,10 @@ class MainViewController: UIViewController {
             self.fetchAssets()
         }
         PHPhotoLibrary.shared().register(self)
+        
+        if PHPhotoLibrary.authorizationStatus() == .authorized{
+            performSegue(withIdentifier: "toPhotos", sender: nil)
+        }
     }
     
     func getPermissionIfNecessary(completionHandler: @escaping (Bool) -> Void) {

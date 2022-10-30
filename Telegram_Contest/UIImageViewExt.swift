@@ -33,14 +33,6 @@ class UIImageViewExt: UIImageView {
         let location = (touch?.location(in: self))!
         
         guard photoVC.drawingEnabled else {
-//            if location.x > self.frame.width || location.y > self.frame.height{
-//                return
-//            }
-//            photoVC.textTouchLocation = location
-//            photoVC.textField!.isHidden = false
-//            photoVC.textBackgroundView?.isHidden = false
-//            photoVC.verticalSizeSlider?.isHidden = false
-            
             return
         }
         
