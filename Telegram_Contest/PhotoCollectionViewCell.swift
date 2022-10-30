@@ -60,7 +60,7 @@ extension UIImageView {
                 completionHandler?(true)
                 return
             }
-            //TODO: try to remove this
+
             UIGraphicsBeginImageContextWithOptions(self.bounds.size, true, 0.0)
             img.draw(in: CGRect(origin: .zero, size: self.bounds.size))
             let incImage = UIGraphicsGetImageFromCurrentImageContext()

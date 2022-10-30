@@ -7,26 +7,21 @@
 
 import UIKit
 
-class UIImageViewExt: UIImageView {
-    public var phVC: PhotoViewController?
+class UIImageViewForDrawing: UIImageView {
     private var drawingQueue = DispatchQueue(label: "com.telegram.drawing")
+    private var lastImage: UIImage?
+    private var pts = [CGPoint](repeating: CGPoint.zero, count: 5)
+    private var ctr = 0
+    private var pointsBuffer = [CGPoint](repeating: CGPoint.zero, count: Constants.CAPACITY)
+    private var bufIdx = 0
+    private var isFirstTouchPoint = false
+    private var lastSegmentOfPrev: LineSegment?
+    private var fullPath = UIBezierPath()
+    private var points = [CGPoint]()
     
+    public var phVC: PhotoViewController?
+    public var photoVC: PhotoViewController{ get{ return phVC! } }
     public var incrementalImage: UIImage?
-    public var lastImage: UIImage?
-    public var pts = [CGPoint](repeating: CGPoint.zero, count: 5)
-    public var ctr = 0
-    public var pointsBuffer = [CGPoint](repeating: CGPoint.zero, count: CAPACITY)
-    public var bufIdx = 0
-    public var isFirstTouchPoint = false
-    public var lastSegmentOfPrev: LineSegment?
-    public var fullPath = UIBezierPath()
-    public var points = [CGPoint]()
-    
-    public var photoVC: PhotoViewController{
-        get{
-            return phVC!
-        }
-    }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         let touch = touches.first
@@ -64,7 +59,7 @@ class UIImageViewExt: UIImageView {
             let bounds = self.bounds
             
             drawingQueue.async{ [self] in
-                let offsetPath = UIBezierPath() // ................. (2)
+                let offsetPath = UIBezierPath()
                 if bufIdx == 0 {
                     return
                 }
@@ -83,10 +78,10 @@ class UIImageViewExt: UIImageView {
                         }
                     }
                     
-                    let frac1: Double = FF / clamp(len_sq(pointsBuffer[i], pointsBuffer[i + 1]), LOWER, UPPER) // ................. (4)
-                    let frac2: Double = FF / clamp(len_sq(pointsBuffer[i + 1], pointsBuffer[i + 2]), LOWER, UPPER)
-                    let frac3: Double = FF / clamp(len_sq(pointsBuffer[i + 2], pointsBuffer[i + 3]), LOWER, UPPER)
-                    ls[1] = lineSegmentPerpendicular(to: LineSegment(firstPoint: pointsBuffer[i], secondPoint: pointsBuffer[i + 1]), ofRelativeLength: frac1) // ................. (5)
+                    let frac1: Double = Constants.FF / clamp(len_sq(pointsBuffer[i], pointsBuffer[i + 1]), Constants.LOWER, Constants.UPPER)
+                    let frac2: Double = Constants.FF / clamp(len_sq(pointsBuffer[i + 1], pointsBuffer[i + 2]), Constants.LOWER, Constants.UPPER)
+                    let frac3: Double = Constants.FF / clamp(len_sq(pointsBuffer[i + 2], pointsBuffer[i + 3]), Constants.LOWER, Constants.UPPER)
+                    ls[1] = lineSegmentPerpendicular(to: LineSegment(firstPoint: pointsBuffer[i], secondPoint: pointsBuffer[i + 1]), ofRelativeLength: frac1)
                     ls[2] = lineSegmentPerpendicular(to: LineSegment(firstPoint: pointsBuffer[i + 1], secondPoint: pointsBuffer[i + 2]), ofRelativeLength: frac2)
                     ls[3] = lineSegmentPerpendicular(to: LineSegment(firstPoint: pointsBuffer[i + 2], secondPoint: pointsBuffer[i + 3]), ofRelativeLength: frac3)
                     
@@ -116,7 +111,7 @@ class UIImageViewExt: UIImageView {
                     photoVC.currentColor.setStroke()
                     photoVC.currentColor.setFill()
                     offsetPath.lineWidth = photoVC.prelineSize
-                    offsetPath.stroke() // ................. (8)
+                    offsetPath.stroke()
                     offsetPath.fill()
                 }
                 
@@ -124,7 +119,7 @@ class UIImageViewExt: UIImageView {
                 UIGraphicsEndImageContext()
                 offsetPath.removeAllPoints()
                 DispatchQueue.main.async(execute: { [self] in
-                    photoVC.drawImage(incrementalImage, false, nil)
+                    photoVC.drawImage(incrementalImage)
                     bufIdx = 0
                     self.setNeedsDisplay()
                 })
@@ -193,14 +188,14 @@ class UIImageViewExt: UIImageView {
         
     }
     
-    public func len_sq(_ p1: CGPoint,_ p2: CGPoint)->Double{
+    private func len_sq(_ p1: CGPoint,_ p2: CGPoint)->Double{
         let dx = p2.x - p1.x
         let dy = p2.y - p1.y
         
         return dx * dx + dy * dy
     }
     
-    public func clamp(_ value: Double,_ lower: Double,_ higher: Double)->Double{
+    private func clamp(_ value: Double,_ lower: Double,_ higher: Double)->Double{
         if value < lower{
             return lower
         }
@@ -210,7 +205,7 @@ class UIImageViewExt: UIImageView {
         return value
     }
     
-    func drawCircle(_ clResult: ClassificationResult) -> UIImage? {
+    private func drawCircle(_ clResult: ClassificationResult) -> UIImage? {
         let center = CGPoint(x: clResult.x + clResult.width / 2, y: clResult.y + clResult.height / 2)
         let path = UIBezierPath()
         path.addArc(withCenter: center, radius: clResult.height / 2, startAngle: 0.0, endAngle: Double.pi * 2.0, clockwise: true)
@@ -237,7 +232,7 @@ class UIImageViewExt: UIImageView {
         return newImage
     }
     
-    func drawRectangle(_ clResult: ClassificationResult) -> UIImage? {
+    private func drawRectangle(_ clResult: ClassificationResult) -> UIImage? {
         guard let image = lastImage else {return nil}
         let bounds = self.bounds
         
@@ -265,7 +260,7 @@ class UIImageViewExt: UIImageView {
         return newImage
     }
     
-    public func drawUnknown()->UIImage?{
+    private func drawUnknown()->UIImage?{
         let bounds = self.bounds
         guard let image = lastImage else {return nil}
         UIGraphicsBeginImageContextWithOptions(bounds.size, true, 0.0)
@@ -290,7 +285,7 @@ class UIImageViewExt: UIImageView {
         return newImage
     }
     
-    public func classify()->ClassificationResult{
+    private func classify()->ClassificationResult{
         var left = self.bounds.width
         var top = self.bounds.height
         var right = 0.0
@@ -311,7 +306,6 @@ class UIImageViewExt: UIImageView {
             }
         }
         
-        let center = CGPoint(x: (left+right)/2, y: (top+bottom)/2)
         var sects = [Sector](repeating: Sector(x: 0, y: 0, c: 0), count: 9)
         let x3 = (right + (1/(right-left)) - left) / 3
         let y3 = (bottom + (1/(bottom-top)) - top) / 3
@@ -354,8 +348,6 @@ class UIImageViewExt: UIImageView {
         let corners = getCorners(angles: angles, pts: sigPts)
         if corners.count <= 1 {
             return ClassificationResult(type: .circle, x: left, y: top, height: bottom - top, width: right - left)
-        }else if corners.count == 3{
-            return ClassificationResult(type: .triangle, x: left, y: top, height: bottom - top, width: right - left)
         }else if corners.count == 4 {
             return ClassificationResult(type: .rectangle, x: left, y: top, height: bottom - top, width: right - left)
         } else {
@@ -363,7 +355,7 @@ class UIImageViewExt: UIImageView {
         }
     }
     
-    public func getCorners(angles: [Double], pts: [Sector])->[Sector]{
+    private func getCorners(angles: [Double], pts: [Sector])->[Sector]{
         var list = [Sector]()
         if pts.isEmpty{
             list = points.map { p in
@@ -383,4 +375,9 @@ class UIImageViewExt: UIImageView {
         }
         return corners
     }
+}
+
+struct LineSegment{
+    var firstPoint: CGPoint
+    var secondPoint: CGPoint
 }

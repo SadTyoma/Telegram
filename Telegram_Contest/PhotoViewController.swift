@@ -8,20 +8,35 @@
 import UIKit
 import Photos
 
-let CAPACITY = 100
-let FF = 0.2
-let LOWER = 0.01
-let UPPER = 1.0
-
 class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
-    
     @IBOutlet weak var clearAllButton: UIBarButtonItem!
-    @IBOutlet weak var photoView: UIImageViewExt!
+    @IBOutlet weak var photoView: UIImageViewForDrawing!
     @IBOutlet weak var drawingTool: DrawAndTextView!
     @IBOutlet weak var text: UIImageView!
     
-    var asset: PHAsset
-    var editingOutput: PHContentEditingOutput?
+    private var asset: PHAsset
+    private var textTouchLocation: CGPoint?
+    private var textLocation: CGPoint?
+    private var textField : UITextField?
+    private var textFromTextField = ""
+    private let fontTypes = ["Arial-BoldMT", "HoeflerText-Italic", "Marker Felt"]
+    private var pinchRecognizer: UIPinchGestureRecognizer?
+    private var rotationRecognizer: UIRotationGestureRecognizer?
+    private var panRecognizer: UIPanGestureRecognizer?
+    private var tapRecognizer: UITapGestureRecognizer?
+    private var verticalSizeSlider: UISlider?
+    private var textImage: UIImage?
+    private var textBackgroundView: UIView?
+    private var imageRotation = 0.0
+    private var imageScale = 1.0
+    private var fontIndex = 0
+    
+    public var currentColor: UIColor = .black
+    public var drawingEnabled = true
+    public var textSize = 36.0
+    public var prelineSize: Double{ get{ return textSize / 8 } }
+    public var lineSize: Double{ get{ return textSize / 12 } }
+    public var imageArray = [UIImage?]()
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) not implemented")
@@ -40,9 +55,9 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
         let scale = sender.scale
         let imageView = sender.view as! UIImageView
         imageView.transform = CGAffineTransformScale(imageView.transform, scale, scale)
-    
+        
         imageScale *= scale
-
+        
         sender.scale = 1
     }
     
@@ -55,15 +70,23 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
     }
     
     @objc func didPanned(sender: UIPanGestureRecognizer) {
-        let translation = sender.translation(in: text)
+        let imageView = sender.view as! UIImageView
+        let translation = sender.translation(in: imageView)
+    
+        let oldTransform = imageView.transform
+        let newTransform = oldTransform.translatedBy(x: translation.x,
+                                                     y: translation.y)
+        imageView.transform = newTransform
         
-        text.frame.origin.x += translation.x
-        text.frame.origin.y += translation.y
+        if text.frame.origin.x < 0.0 || text.frame.origin.x + text.frame.width > photoView.frame.width || text.frame.origin.y + text.frame.height > photoView.frame.height + photoView.frame.origin.y || text.frame.origin.y < photoView.frame.origin.y {
+            imageView.transform = oldTransform
+            return
+        }
         
         textLocation?.x += translation.x
         textLocation?.y += translation.y
         
-        sender.setTranslation(.zero, in: text)
+        sender.setTranslation(.zero, in: imageView)
     }
     
     @objc func didTapped(sender: UITapGestureRecognizer){
@@ -137,7 +160,6 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
         text.frame = CGRect(origin: .zero, size: CGSize(width: 1, height: 1))
         text.isHidden = true
         
-        //DrawingTool
         drawingTool.undoButton.addTarget(self, action: #selector(self.undo), for: .touchUpInside)
         drawingTool.colorButton.addTarget(self, action: #selector(self.colorButtonClicked), for: .touchUpInside)
         drawingTool.sizeBar.addTarget(self, action: #selector(self.sizeChanged), for: .valueChanged)
@@ -156,7 +178,7 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
         PHPhotoLibrary.shared().unregisterChangeObserver(self)
     }
     
-    func createVerticalSlider(){
+    private func createVerticalSlider(){
         verticalSizeSlider = UISlider(frame: .zero)
         guard let slider = verticalSizeSlider else {return}
         slider.transform = CGAffineTransformMakeRotation(CGFloat(-Double.pi / 2))
@@ -179,9 +201,10 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
     
     @objc func sliderChanged(sender: UISlider) {
         textSize = Double(sender.value)
+        drawingTool.sizeBar.value = Float(textSize)
     }
     
-    func updateUndoButton() {
+    private func updateUndoButton() {
         let flag = imageArray.count > 1
         drawingTool.undoButton.isEnabled = flag
         drawingTool.undoButton.tintColor = flag ? .darkGray : .lightGray
@@ -200,8 +223,7 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
     }
     
     @objc func acceptButtonClicked() {
-        let location = CGPoint(x: textLocation!.x - text!.frame.width / 2, y: textLocation!.y - text!.frame.height / 2)
-        drawImage2(textImage, true, location)
+        drawImage(textImage, true, text.frame.origin)
         drawingTool.acceptButton.isEnabled = false
         text.isHidden = true
         text.frame = CGRect(origin: .zero, size: CGSize(width: 1, height: 1))
@@ -229,6 +251,7 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
             }
         case 1:
             drawingEnabled = false
+            drawingTool.sizeView.isHidden = true
         default:
             break
         }
@@ -244,6 +267,7 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
     
     @objc func sizeChanged() {
         textSize = Double(drawingTool.sizeBar.value)
+        verticalSizeSlider?.value = Float(textSize)
     }
     
     @objc func colorButtonClicked() {
@@ -261,11 +285,11 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
         }
     }
     
-    func getPhoto() {
+    private func getPhoto() {
         photoView.fetchImageAsset(asset, targetSize: photoView.bounds.size, completionHandler: nil)
     }
     
-    func createTextImage(text: String)->UIImage?{
+    private func createTextImage(text: String)->UIImage?{
         let attributes = [
             NSAttributedString.Key.foregroundColor : currentColor,
             NSAttributedString.Key.font : UIFont(name: fontTypes[fontIndex], size: textSize)!,
@@ -280,37 +304,6 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
         return UIImage(ciImage: outputImage)
     }
     
-    public var drawingEnabled = true
-    public var textTouchLocation: CGPoint?
-    public var textLocation: CGPoint?
-    public var textField : UITextField?
-    public var textFromTextField = ""
-    
-    public var currentColor: UIColor = .black
-    public let fontTypes = ["Arial-BoldMT", "HoeflerText-Italic", "Marker Felt"]
-    public var pinchRecognizer: UIPinchGestureRecognizer?
-    public var rotationRecognizer: UIRotationGestureRecognizer?
-    public var panRecognizer: UIPanGestureRecognizer?
-    public var tapRecognizer: UITapGestureRecognizer?
-    public var verticalSizeSlider: UISlider?
-    public var textImage: UIImage?
-    public var textBackgroundView: UIView?
-    public var imageRotation = 0.0
-    public var imageScale = 1.0
-    public var fontIndex = 0
-    public var textSize = 36.0
-    public var prelineSize: Double{
-        get{
-            return textSize / 8
-        }
-    }
-    public var lineSize: Double{
-        get{
-            return textSize / 12
-        }
-    }
-    public var imageArray = [UIImage?]()
-    
     @objc func eraseDrawing(_ sender: UITapGestureRecognizer? = nil){
         self.photoView.setNeedsDisplay()
     }
@@ -320,43 +313,32 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
         updateUndoButton()
     }
     
-    public func drawImage(_ incrementalImage:UIImage?, _ saveImage: Bool, _ location: CGPoint?){
+    public func drawImage(_ incrementalImage:UIImage?){
         if let incrementalImage = incrementalImage, let image = self.photoView.image{
             let size = self.photoView.bounds.size
             UIGraphicsBeginImageContextWithOptions(size, true, 0.0)
             image.draw(in: CGRect(origin: .zero, size: size))
-            
-            if let location = location {
-                let size = incrementalImage.size
-                incrementalImage.draw(in: CGRect(origin: location, size: size))
-            }else{
-                incrementalImage.draw(in: CGRect(origin: .zero, size: size))
-            }
-            
+            incrementalImage.draw(in: CGRect(origin: .zero, size: size))
             let newImage = UIGraphicsGetImageFromCurrentImageContext()
             UIGraphicsEndImageContext()
             self.photoView.image = newImage
-            if saveImage{
-                addToImageArray(newImage)
-            }
         }
     }
     
-    public func drawImage2(_ incrementalImage:UIImage?, _ saveImage: Bool, _ location: CGPoint?){
+    public func drawImage(_ incrementalImage:UIImage?, _ saveImage: Bool, _ location: CGPoint?){
         if let incrementalImage = incrementalImage, let image = self.photoView.image{
             let scaled = incrementalImage.scale(by: imageScale)
-            var rotation = Double.pi - abs(imageRotation)
-            rotation *= -1
             let rotated = scaled!.rotate(radians: Float(imageRotation))
             
             let size = self.photoView.bounds.size
             UIGraphicsBeginImageContextWithOptions(size, true, 0.0)
             image.draw(in: CGRect(origin: .zero, size: size))
             
-            if let location = location {
+            if var location = location {
                 let size = rotated!.size
+                location.y -= photoView.frame.origin.y
                 rotated!.draw(in: CGRect(origin: location, size: size))
-            }else{
+            } else {
                 rotated!.draw(in: CGRect(origin: .zero, size: size))
             }
             
@@ -387,12 +369,13 @@ extension PhotoViewController: UITextFieldDelegate{
         textFromTextField = ""
         textField.text = textFromTextField
     }
+    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textFromTextField = textField.text!
         textField.isHidden = true
         textBackgroundView?.isHidden = true
         self.view.endEditing(true)
-                
+        
         textImage = createTextImage(text: textFromTextField)
         let textView = UIImageView(image: textImage)
         if let textTouchLocation = textTouchLocation {
@@ -418,95 +401,4 @@ extension PhotoViewController: UIColorPickerViewControllerDelegate{
         currentColor = color
         drawingTool.imageTip.tintColor = color
     }
-}
-
-struct Sector{
-    var x:CGFloat
-    var y:CGFloat
-    var c:Int
-    
-    public init(point: CGPoint, c: Int){
-        x = point.x
-        y = point.y
-        self.c = c
-    }
-    
-    public init(x:CGFloat,y:CGFloat,c:Int){
-        self.x = x
-        self.y = y
-        self.c = c
-    }
-}
-
-struct ClassificationResult{
-    var type: ShapeType
-    var x: CGFloat
-    var y: CGFloat
-    var height: CGFloat
-    var width: CGFloat
-}
-
-enum ShapeType{
-    case rectangle
-    case circle
-    case triangle
-    case unknown
-}
-
-struct LineSegment{
-    var firstPoint: CGPoint
-    var secondPoint: CGPoint
-}
-
-extension UIImage {
-    func rotate(radians: Float) -> UIImage? {
-        var newSize = CGRect(origin: CGPoint.zero, size: self.size).applying(CGAffineTransform(rotationAngle: CGFloat(radians))).size
-        // Trim off the extremely small float value to prevent core graphics from rounding it up
-        newSize.width = floor(newSize.width)
-        newSize.height = floor(newSize.height)
-
-        UIGraphicsBeginImageContextWithOptions(newSize, false, self.scale)
-        let context = UIGraphicsGetCurrentContext()!
-
-        // Move origin to middle
-        context.translateBy(x: newSize.width/2, y: newSize.height/2)
-        // Rotate around middle
-        context.rotate(by: CGFloat(radians))
-        // Draw the image at its center
-        self.draw(in: CGRect(x: -self.size.width/2, y: -self.size.height/2, width: self.size.width, height: self.size.height))
-
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-
-        return newImage
-    }
-    
-    func resize(targetSize: CGSize) -> UIImage {
-        let size = self.size
-            
-            let widthRatio  = targetSize.width  / size.width
-            let heightRatio = targetSize.height / size.height
-            
-            var newSize: CGSize
-            if widthRatio > heightRatio {
-                newSize = CGSize(width: size.width * heightRatio, height: size.height * heightRatio)
-            } else {
-                newSize = CGSize(width: size.width * widthRatio,  height: size.height * widthRatio)
-            }
-            
-            let rect = CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height)
-            
-            UIGraphicsBeginImageContextWithOptions(newSize, false, 0)
-            self.draw(in: rect)
-            let newImage = UIGraphicsGetImageFromCurrentImageContext()
-            UIGraphicsEndImageContext()
-            
-            return newImage!
-        }
-    
-    func scale(by scale: CGFloat) -> UIImage? {
-            let size = self.size
-            let scaledSize = CGSize(width: size.width * scale, height: size.height * scale)
-        return self.resize(targetSize: scaledSize)
-        }
 }

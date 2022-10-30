@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		9A3AD6A728F9D4F70081D705 /* PhotoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3AD6A628F9D4F70081D705 /* PhotoViewController.swift */; };
 		9A3AD6AB28F9DD8C0081D705 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A3AD6AA28F9DD8C0081D705 /* MainViewController.swift */; };
-		9A4BA22E290C56730042CFAE /* UIImageViewExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4BA22D290C56730042CFAE /* UIImageViewExt.swift */; };
+		9A4BA22E290C56730042CFAE /* UIImageViewForDrawing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4BA22D290C56730042CFAE /* UIImageViewForDrawing.swift */; };
 		9A892E782907131B00BFA056 /* DrawAndTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A892E772907131B00BFA056 /* DrawAndTextView.swift */; };
 		9A892E7A2907132D00BFA056 /* DrawAndTextView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 9A892E792907132D00BFA056 /* DrawAndTextView.xib */; };
 		9AC86AF428F81D5A00353DAD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AC86AF328F81D5A00353DAD /* AppDelegate.swift */; };
@@ -20,12 +20,15 @@
 		9AC86B0028F81D5D00353DAD /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9AC86AFE28F81D5D00353DAD /* LaunchScreen.storyboard */; };
 		9AC86B0828F8273400353DAD /* Image.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AC86B0728F8273400353DAD /* Image.swift */; };
 		9AC86B0C28F89A1100353DAD /* PhotoCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AC86B0B28F89A1100353DAD /* PhotoCollectionViewCell.swift */; };
+		9AE3D9A3290E66B900CC61A8 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE3D9A2290E66B900CC61A8 /* Constants.swift */; };
+		9AE3D9A5290E699C00CC61A8 /* ClassificationHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE3D9A4290E699B00CC61A8 /* ClassificationHelpers.swift */; };
+		9AE3D9A7290E6A1700CC61A8 /* UIImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AE3D9A6290E6A1700CC61A8 /* UIImageExtensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		9A3AD6A628F9D4F70081D705 /* PhotoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoViewController.swift; sourceTree = "<group>"; };
 		9A3AD6AA28F9DD8C0081D705 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
-		9A4BA22D290C56730042CFAE /* UIImageViewExt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageViewExt.swift; sourceTree = "<group>"; };
+		9A4BA22D290C56730042CFAE /* UIImageViewForDrawing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageViewForDrawing.swift; sourceTree = "<group>"; };
 		9A892E772907131B00BFA056 /* DrawAndTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawAndTextView.swift; sourceTree = "<group>"; };
 		9A892E792907132D00BFA056 /* DrawAndTextView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = DrawAndTextView.xib; sourceTree = "<group>"; };
 		9AC86AF028F81D5A00353DAD /* Telegram_Contest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Telegram_Contest.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -38,6 +41,9 @@
 		9AC86B0128F81D5D00353DAD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		9AC86B0728F8273400353DAD /* Image.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Image.swift; sourceTree = "<group>"; };
 		9AC86B0B28F89A1100353DAD /* PhotoCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCollectionViewCell.swift; sourceTree = "<group>"; };
+		9AE3D9A2290E66B900CC61A8 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		9AE3D9A4290E699B00CC61A8 /* ClassificationHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassificationHelpers.swift; sourceTree = "<group>"; };
+		9AE3D9A6290E6A1700CC61A8 /* UIImageExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,11 +80,14 @@
 				9AC86AF528F81D5A00353DAD /* SceneDelegate.swift */,
 				9AC86AF728F81D5A00353DAD /* PhotosCollectionViewController.swift */,
 				9A3AD6A628F9D4F70081D705 /* PhotoViewController.swift */,
-				9A4BA22D290C56730042CFAE /* UIImageViewExt.swift */,
+				9AE3D9A4290E699B00CC61A8 /* ClassificationHelpers.swift */,
+				9AE3D9A2290E66B900CC61A8 /* Constants.swift */,
+				9A4BA22D290C56730042CFAE /* UIImageViewForDrawing.swift */,
 				9A892E772907131B00BFA056 /* DrawAndTextView.swift */,
 				9A892E792907132D00BFA056 /* DrawAndTextView.xib */,
 				9AC86B0B28F89A1100353DAD /* PhotoCollectionViewCell.swift */,
 				9AC86B0728F8273400353DAD /* Image.swift */,
+				9AE3D9A6290E6A1700CC61A8 /* UIImageExtensions.swift */,
 				9AC86AF928F81D5A00353DAD /* Main.storyboard */,
 				9AC86AFC28F81D5D00353DAD /* Assets.xcassets */,
 				9AC86AFE28F81D5D00353DAD /* LaunchScreen.storyboard */,
@@ -161,10 +170,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				9AC86AF828F81D5A00353DAD /* PhotosCollectionViewController.swift in Sources */,
-				9A4BA22E290C56730042CFAE /* UIImageViewExt.swift in Sources */,
+				9A4BA22E290C56730042CFAE /* UIImageViewForDrawing.swift in Sources */,
 				9AC86B0828F8273400353DAD /* Image.swift in Sources */,
+				9AE3D9A7290E6A1700CC61A8 /* UIImageExtensions.swift in Sources */,
 				9A892E782907131B00BFA056 /* DrawAndTextView.swift in Sources */,
 				9AC86AF428F81D5A00353DAD /* AppDelegate.swift in Sources */,
+				9AE3D9A3290E66B900CC61A8 /* Constants.swift in Sources */,
+				9AE3D9A5290E699C00CC61A8 /* ClassificationHelpers.swift in Sources */,
 				9A3AD6A728F9D4F70081D705 /* PhotoViewController.swift in Sources */,
 				9AC86AF628F81D5A00353DAD /* SceneDelegate.swift in Sources */,
 				9AC86B0C28F89A1100353DAD /* PhotoCollectionViewCell.swift in Sources */,
