@@ -70,23 +70,23 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
     }
     
     @objc func didPanned(sender: UIPanGestureRecognizer) {
-        let translation = sender.translation(in: text)
-        let location = sender.location(in: self.view)
+        let imageView = sender.view as! UIImageView
+        let translation = sender.translation(in: imageView)
+    
+        let oldTransform = imageView.transform
+        let newTransform = oldTransform.translatedBy(x: translation.x,
+                                                     y: translation.y)
+        imageView.transform = newTransform
         
-        text.frame.origin.x += translation.x
-        text.frame.origin.y += translation.y
-        
-        if text.frame.origin.x < 0.0 || text.frame.origin.x + text.frame.width > photoView.frame.width || text.frame.origin.y + text.frame.height > photoView.frame.height + photoView.frame.origin.y || text.frame.origin.y < photoView.frame.origin.y{
-            text.frame.origin.x -= translation.x
-            text.frame.origin.y -= translation.y
-            
+        if text.frame.origin.x < 0.0 || text.frame.origin.x + text.frame.width > photoView.frame.width || text.frame.origin.y + text.frame.height > photoView.frame.height + photoView.frame.origin.y || text.frame.origin.y < photoView.frame.origin.y {
+            imageView.transform = oldTransform
             return
         }
         
         textLocation?.x += translation.x
         textLocation?.y += translation.y
         
-        sender.setTranslation(.zero, in: text)
+        sender.setTranslation(.zero, in: imageView)
     }
     
     @objc func didTapped(sender: UITapGestureRecognizer){
@@ -223,8 +223,7 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
     }
     
     @objc func acceptButtonClicked() {
-        let location = CGPoint(x: textLocation!.x - text!.frame.width / 2, y: textLocation!.y - text!.frame.height / 2)
-        drawImage(textImage, true, location)
+        drawImage(textImage, true, text.frame.origin)
         drawingTool.acceptButton.isEnabled = false
         text.isHidden = true
         text.frame = CGRect(origin: .zero, size: CGSize(width: 1, height: 1))
@@ -335,10 +334,11 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
             UIGraphicsBeginImageContextWithOptions(size, true, 0.0)
             image.draw(in: CGRect(origin: .zero, size: size))
             
-            if let location = location {
+            if var location = location {
                 let size = rotated!.size
+                location.y -= photoView.frame.origin.y
                 rotated!.draw(in: CGRect(origin: location, size: size))
-            }else{
+            } else {
                 rotated!.draw(in: CGRect(origin: .zero, size: size))
             }
             
