@@ -60,9 +60,22 @@ extension UIImageView {
                 completionHandler?(true)
                 return
             }
-
+            
+            let viewportAspectRatio = self.bounds.size.width / self.bounds.size.height
+            let imageAspectRatio = img.size.width / img.size.height
+            
+            var coeff = CGFloat(1.0)
+            if viewportAspectRatio > imageAspectRatio { // viewport is wider
+                coeff = self.bounds.size.height / img.size.height
+            } else { // viewport is taller
+                coeff = self.bounds.size.width / img.size.width
+            }
+            let resultSize = CGSize(width: img.size.width * coeff, height: img.size.height * coeff)
+            
             UIGraphicsBeginImageContextWithOptions(self.bounds.size, true, 0.0)
-            img.draw(in: CGRect(origin: .zero, size: self.bounds.size))
+            let origin = CGPoint(x: (self.bounds.size.width - resultSize.width) / 2,
+                                y: (self.bounds.size.height - resultSize.height) / 2)
+            img.draw(in: CGRect(origin: origin, size: resultSize))
             let incImage = UIGraphicsGetImageFromCurrentImageContext()
             self.image = incImage
             completionHandler?(true)

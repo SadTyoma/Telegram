@@ -54,7 +54,7 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
     @objc func didPinch(sender: UIPinchGestureRecognizer) {
         let scale = sender.scale
         let imageView = sender.view as! UIImageView
-        imageView.transform = CGAffineTransformScale(imageView.transform, scale, scale)
+        imageView.transform = imageView.transform.scaledBy(x: scale, y: scale)
         
         imageScale *= scale
         
@@ -64,7 +64,7 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
     @objc func didRotate(sender: UIRotationGestureRecognizer) {
         let rotation = sender.rotation
         let imageView = sender.view as! UIImageView
-        imageView.transform = CGAffineTransformRotate(imageView.transform, rotation)
+        imageView.transform = imageView.transform.rotated(by: rotation)
         imageRotation += rotation
         sender.rotation = 0
     }
@@ -181,7 +181,7 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
     private func createVerticalSlider(){
         verticalSizeSlider = UISlider(frame: .zero)
         guard let slider = verticalSizeSlider else {return}
-        slider.transform = CGAffineTransformMakeRotation(CGFloat(-Double.pi / 2))
+        slider.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi / 2))
         slider.maximumValue = 80
         slider.minimumValue = 20
         slider.value = 36
@@ -227,7 +227,7 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
         drawingTool.acceptButton.isEnabled = false
         text.isHidden = true
         text.frame = CGRect(origin: .zero, size: CGSize(width: 1, height: 1))
-        text.transform = CGAffineTransformIdentity
+        text.transform = CGAffineTransform.identity
         
         verticalSizeSlider?.isHidden = true
         
@@ -315,7 +315,7 @@ class PhotoViewController: UIViewController, UIGestureRecognizerDelegate {
     
     public func drawImage(_ incrementalImage:UIImage?){
         if let incrementalImage = incrementalImage, let image = self.photoView.image{
-            let size = self.photoView.bounds.size
+            let size = image.size
             UIGraphicsBeginImageContextWithOptions(size, true, 0.0)
             image.draw(in: CGRect(origin: .zero, size: size))
             incrementalImage.draw(in: CGRect(origin: .zero, size: size))

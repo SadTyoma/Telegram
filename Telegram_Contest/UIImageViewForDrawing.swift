@@ -368,7 +368,7 @@ class UIImageViewForDrawing: UIImageView {
         var corners = [Sector]()
         var i = 0
         while i < angles.count{
-            if angles[i] < 125{
+            if angles[i] < 125 {
                 corners.append(list[(i + 1) % list.count])
             }
             i += 1
